@@ -1,0 +1,12 @@
+kurigram==2.2.19
+tgcrypto
+python-dotenv
+requests
+pycryptodome
+curl_cffi
+beautifulsoup4
+aiohttp
+motor
+guessit
+ffmpeg
+psutil
