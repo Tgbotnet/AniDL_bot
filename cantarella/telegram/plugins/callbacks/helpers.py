@@ -10,6 +10,18 @@ from cantarella.button import Button as InlineKeyboardButton
 
 logger = logging.getLogger(__name__)
 
+
+async def safe_answer(query, text=None, show_alert=False):
+    """Answer a callback query exactly once, swallowing late/duplicate errors."""
+    try:
+        if text is None:
+            await query.answer(show_alert=show_alert)
+        else:
+            await query.answer(text, show_alert=show_alert)
+    except Exception:
+        pass
+
+
 async def check_fsub(client, user_id):
     async def is_sub(client, user_id, channel_id):
         try:

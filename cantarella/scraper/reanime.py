@@ -164,8 +164,13 @@ class ReAnimeClient:
 
     def search(self, query: str, limit: int = 24) -> list:
         resp = self.get(f"{BASE}/api/v1/search", params={"q": query, "limit": limit})
-        resp.raise_for_status()
-        payload = resp.json()
+        if resp.status_code != 200:
+            print(f"reanime search HTTP {resp.status_code}", flush=True)
+            return []
+        try:
+            payload = resp.json()
+        except Exception:
+            return []
         out = []
         for item in payload.get("results") or []:
             title = item.get("title") or {}
@@ -184,9 +189,41 @@ class ReAnimeClient:
 
     def anime_details(self, slug: str) -> dict:
         slug = self.slug_of(slug) if "://" in (slug or "") else (slug or "").strip("/")
-        resp = self.get(f"{BASE}/api/v1/anime/{urllib.parse.quote(slug)}")
-        resp.raise_for_status()
-        data = resp.json()
+        fallback_title = slug.replace("-", " ").title() if slug else "Unknown"
+        if not slug or len(slug) < 2:
+            return {
+                "anime_id": slug or "", "anilist_id": None, "mal_id": None,
+                "themoviedb_id": None, "external_seasons": {},
+                "title": fallback_title, "format": "ANIME",
+                "subbed": 0, "dubbed": 0, "cover": "", "raw": {}, "found": False,
+            }
+        try:
+            resp = self.get(f"{BASE}/api/v1/anime/{urllib.parse.quote(slug)}")
+        except Exception as exc:
+            print(f"anime_details fetch failed ({slug}): {exc}", flush=True)
+            return {
+                "anime_id": slug, "anilist_id": None, "mal_id": None,
+                "themoviedb_id": None, "external_seasons": {},
+                "title": fallback_title, "format": "ANIME",
+                "subbed": 0, "dubbed": 0, "cover": "", "raw": {}, "found": False,
+            }
+        if resp.status_code != 200:
+            print(f"anime_details HTTP {resp.status_code} for {slug}", flush=True)
+            return {
+                "anime_id": slug, "anilist_id": None, "mal_id": None,
+                "themoviedb_id": None, "external_seasons": {},
+                "title": fallback_title, "format": "ANIME",
+                "subbed": 0, "dubbed": 0, "cover": "", "raw": {}, "found": False,
+            }
+        try:
+            data = resp.json()
+        except Exception:
+            return {
+                "anime_id": slug, "anilist_id": None, "mal_id": None,
+                "themoviedb_id": None, "external_seasons": {},
+                "title": fallback_title, "format": "ANIME",
+                "subbed": 0, "dubbed": 0, "cover": "", "raw": {}, "found": False,
+            }
         title = data.get("title") or {}
         name = title.get("english") or title.get("romaji") or slug.replace("-", " ").title()
         return {
@@ -197,6 +234,7 @@ class ReAnimeClient:
             "external_seasons": data.get("external_seasons") or {},
             "title": clean_text(name),
             "format": data.get("format") or "ANIME",
+            "found": True,
             "subbed": data.get("subbed") or 0,
             "dubbed": data.get("dubbed") or 0,
             "cover": (data.get("cover_image") or {}).get("large") if isinstance(data.get("cover_image"), dict) else "",
@@ -205,8 +243,16 @@ class ReAnimeClient:
 
     def episodes(self, slug: str) -> list:
         slug = self.slug_of(slug) if "://" in (slug or "") else (slug or "").strip("/")
-        resp = self.get(f"{BASE}/watch/{urllib.parse.quote(slug)}", params={"ep": 1})
-        resp.raise_for_status()
+        if not slug:
+            return []
+        try:
+            resp = self.get(f"{BASE}/watch/{urllib.parse.quote(slug)}", params={"ep": 1})
+        except Exception as exc:
+            print(f"episodes fetch failed ({slug}): {exc}", flush=True)
+            return []
+        if resp.status_code != 200:
+            print(f"episodes HTTP {resp.status_code} for {slug}", flush=True)
+            return []
         html = resp.text
         match = _EPISODES_RE.search(html)
         if not match:
@@ -239,9 +285,18 @@ class ReAnimeClient:
         url = f"{BASE}/api/flix/{anilist_id or 0}/{ep}"
         if params:
             url += "?" + urllib.parse.urlencode(params)
-        resp = self.get(url, headers={"Accept": "application/json"})
-        resp.raise_for_status()
-        payload = resp.json()
+        try:
+            resp = self.get(url, headers={"Accept": "application/json"})
+        except Exception as exc:
+            print(f"servers fetch failed: {exc}", flush=True)
+            return []
+        if resp.status_code != 200:
+            print(f"servers HTTP {resp.status_code} for anilist={anilist_id} ep={ep}", flush=True)
+            return []
+        try:
+            payload = resp.json()
+        except Exception:
+            return []
         servers = payload.get("servers") or []
         return [{
             "name": s.get("serverName", "?"),
@@ -360,6 +415,8 @@ class ReAnimeScraper(BaseScraper):
             except Exception as exc:
                 print(f"reanime url resolve failed: {exc}", flush=True)
                 return []
+            if not details.get("found"):
+                return []
             return [{
                 "title": details["title"],
                 "id": details["anime_id"],
@@ -378,6 +435,8 @@ class ReAnimeScraper(BaseScraper):
     def list_episodes(self, value: str) -> list:
         slug = self.client.slug_of(value)
         details = self.client.anime_details(slug)
+        if not details.get("found"):
+            return []
         episodes = self.client.episodes(slug)
         out = []
         for episode in episodes:
@@ -422,8 +481,12 @@ class ReAnimeScraper(BaseScraper):
 
     def resolve_episode(self, url: str) -> dict:
         slug = self.client.slug_of(url)
+        if not slug:
+            raise RuntimeError("empty anime slug — paste a full Re:Anime link")
         ep = self.client.episode_of(url)
         details = self.client.anime_details(slug)
+        if not details.get("found"):
+            raise RuntimeError(f"anime not found on Re:Anime: {slug}")
         episodes = self.client.episodes(slug)
         episode = next((e for e in episodes if e["num"] == ep), None) or (episodes[-1] if episodes else {"num": ep, "title": f"Episode {ep}", "sub": True, "dub": False})
         try:

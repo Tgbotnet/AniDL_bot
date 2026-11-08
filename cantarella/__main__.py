@@ -16,7 +16,9 @@ if not all([API_ID, API_HASH, BOT_TOKEN]):
     print("Please set API_ID, API_HASH, and BOT_TOKEN environment variables.")
     sys.exit(1)
 
-pyrogram.utils.MIN_CHANNEL_ID = -1009147483647
+# Kurigram exposed MIN_CHANNEL_ID; WzGram dropped it (full range built-in).
+if hasattr(pyrogram.utils, "MIN_CHANNEL_ID"):
+    pyrogram.utils.MIN_CHANNEL_ID = -1009147483647
 
 app = Client(
     "anime_bot",

@@ -11,7 +11,7 @@ from cantarella.telegram.download import _handle_download
 from cantarella.telegram.pages import post_to_main_channel
 from cantarella.core.utils import chunk_list
 from config import *
-from .helpers import check_fsub, send_fsub_prompt
+from .helpers import check_fsub, send_fsub_prompt, safe_answer
 
 # ─────────────────────────────────────────────
 #  Batch download
@@ -22,6 +22,7 @@ async def on_download_all_opts(client: Client, callback_query):
     if not await check_fsub(client, callback_query.from_user.id):
         await callback_query.answer("🔒 ᴘʟᴇᴀꜱᴇ ᴊᴏɪɴ ᴛʜᴇ ᴄʜᴀɴɴᴇʟ ꜰɪʀꜱᴛ!", show_alert=True)
         return await send_fsub_prompt(client, callback_query.message)
+    await safe_answer(callback_query)
 
     user_id = callback_query.from_user.id
     if user_id not in user_episodes:
@@ -64,6 +65,7 @@ async def on_toggle_quality(client: Client, callback_query):
     if user_id not in user_episodes:
         await callback_query.answer("❌ ꜱᴇꜱꜱɪᴏɴ ᴇxᴘɪʀᴇᴅ.")
         return
+    await safe_answer(callback_query)
 
     quality  = callback_query.data.split("_")[1]
     selected = user_episodes[user_id].setdefault('selected_qualities', [])
@@ -81,6 +83,7 @@ async def on_start_batch_dl(client: Client, callback_query):
     if not await check_fsub(client, callback_query.from_user.id):
         await callback_query.answer("🔒 ᴘʟᴇᴀꜱᴇ ᴊᴏɪɴ ᴛʜᴇ ᴄʜᴀɴɴᴇʟ ꜰɪʀꜱᴛ!", show_alert=True)
         return await send_fsub_prompt(client, callback_query.message)
+    await safe_answer(callback_query)
 
     user_id = callback_query.from_user.id
     if user_id not in user_episodes:
@@ -167,6 +170,7 @@ async def on_download_quality(client: Client, callback_query):
     if not await check_fsub(client, callback_query.from_user.id):
         await callback_query.answer("🔒 ᴘʟᴇᴀꜱᴇ ᴊᴏɪɴ ᴛʜᴇ ᴄʜᴀɴɴᴇʟ ꜰɪʀꜱᴛ!", show_alert=True)
         return await send_fsub_prompt(client, callback_query.message)
+    await safe_answer(callback_query)
 
     parts   = callback_query.data.split("_")
     quality = parts[1]

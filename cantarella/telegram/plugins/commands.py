@@ -55,18 +55,21 @@ async def handle_settings(client: Client, message):
     source_toggle_label = f"🔄 ꜱᴡɪᴛᴄʜ ᴛᴏ {_next.upper()}"
 
     caption = (
-        "<blockquote><b>⚙️ ʙᴏᴛ ꜱᴇᴛᴛɪɴɢꜱ</b>\n\n"
-        f"<b>📡 ᴏɴɢᴏɪɴɢ ᴀᴜᴛᴏ-ᴅᴏᴡɴʟᴏᴀᴅ:</b> {status_icon}\n"
-        f"<b>🔗 ᴍᴀᴘᴘɪɴɢ ᴍᴏᴅᴇ:</b> {mapping_status_icon}\n"
-        f"<b>📡 ᴀᴄᴛɪᴠᴇ ꜱᴏᴜʀᴄᴇ:</b> {source_display}\n\n"
-        "ᴡʜᴇɴ ᴏɴ, ᴛʜᴇ ʙᴏᴛ ᴀᴜᴛᴏᴍᴀᴛɪᴄᴀʟʟʏ ᴄʜᴇᴄᴋꜱ ғᴏʀ ɴᴇᴡ ᴀɴɪᴍᴇ ᴇᴘɪꜱᴏᴅᴇꜱ ᴀɴᴅ ᴅᴏᴡɴʟᴏᴀᴅꜱ ᴛʜᴇᴍ.</blockquote>"
+        "<blockquote expandable><b>✦ ʙᴏᴛ sᴇᴛᴛɪɴɢs</b>\n\n"
+        f"<b>📡 ᴏɴɢᴏɪɴɢ</b> › {status_icon}\n"
+        f"<b>🔗 ᴍᴀᴘᴘɪɴɢ</b> › {mapping_status_icon}\n"
+        f"<b>✨ sᴏᴜʀᴄᴇ</b> › {source_display}\n\n"
+        "ᴏɴ — ɪ ᴀᴜᴛᴏ-ᴅᴏᴡɴʟᴏᴀᴅ ɴᴇᴡ ᴇᴘɪsᴏᴅᴇs ᴏɴ sᴄʜᴇᴅᴜʟᴇ.\n"
+        "ᴏғғ — ᴍᴀɴᴜᴀʟ sᴇᴀʀᴄʜ ᴏɴʟʏ.</blockquote>"
     )
 
     buttons = InlineKeyboardMarkup([
-        [InlineKeyboardButton(toggle_label, callback_data="toggle_ongoing")],
-        [InlineKeyboardButton(mapping_toggle_label, callback_data="toggle_mapping_mode")],
+        [
+            InlineKeyboardButton(toggle_label, callback_data="toggle_ongoing"),
+            InlineKeyboardButton(mapping_toggle_label, callback_data="toggle_mapping_mode"),
+        ],
         [InlineKeyboardButton(source_toggle_label, callback_data="toggle_active_source")],
-        [InlineKeyboardButton("ᴄʟᴏꜱᴇ •", callback_data="close")]
+        [InlineKeyboardButton("⌂ ʜᴏᴍᴇ", callback_data="start")],
     ])
     await client.send_photo(
         message.chat.id,
@@ -206,19 +209,15 @@ async def handle_start(client: Client, message):
 
     buttons = []
     is_admin = await db.is_admin(message.from_user.id)
+    buttons.append([
+        InlineKeyboardButton("✦ ʜᴇʟᴘ", callback_data="help"),
+        InlineKeyboardButton("ℹ️ ᴀʙᴏᴜᴛ", callback_data="about"),
+    ])
     if is_admin or message.from_user.id == OWNER_ID:
         buttons.append([
-            InlineKeyboardButton("ᴀᴅᴍɪɴ ᴘᴀɴᴇʟ", callback_data="admin_panel"),
-            InlineKeyboardButton("ᴛᴏɢɢʟᴇ ᴏɴɢᴏɪɴɢ", callback_data="toggle_ongoing")
+            InlineKeyboardButton("⚙️ ᴀᴅᴍɪɴ ᴘᴀɴᴇʟ", callback_data="admin_panel"),
+            InlineKeyboardButton("❤ ғᴀᴠᴏʀɪᴛᴇꜱ", callback_data="favorites"),
         ])
-        buttons.append([
-            InlineKeyboardButton("❤ ғᴀᴠᴏʀɪᴛᴇꜱ", callback_data="favorites")
-        ])
-
-    buttons.append([
-        InlineKeyboardButton("• ᴀʙᴏᴜᴛ", callback_data="about"),
-        InlineKeyboardButton("Hᴇʟᴘ •", callback_data="help")
-    ])
 
     inline_buttons = InlineKeyboardMarkup(buttons)
 
@@ -248,9 +247,11 @@ async def handle_favorites(client: Client, message):
     if not favorites:
         return await message.reply("<blockquote>❤ <b>ʏᴏᴜʀ ғᴀᴠᴏʀɪᴛᴇꜱ ʟɪꜱᴛ ɪꜱ ᴇᴍᴘᴛʏ.</b>\nꜱᴇᴀʀᴄʜ ғᴏʀ ᴀɴ ᴀɴɪᴍᴇ ᴛᴏ ᴀᴅᴅ ɪᴛ ᴛᴏ ʏᴏᴜʀ ғᴀᴠᴏʀɪᴛᴇꜱ!</blockquote>", parse_mode=ParseMode.HTML)
 
+    from cantarella.core.state import user_favorites_cache
+    user_favorites_cache[user_id] = favorites
     buttons = []
-    for fav in favorites:
-        buttons.append([InlineKeyboardButton(fav['title'], callback_data=f"anime_{fav['id']}")])
+    for idx, fav in enumerate(favorites):
+        buttons.append([InlineKeyboardButton(f"❤ {fav['title'][:40]}", callback_data=f"favsel_{idx}")])
 
     buttons.append([InlineKeyboardButton("❌ ᴄʟᴏꜱᴇ", callback_data="close")])
 

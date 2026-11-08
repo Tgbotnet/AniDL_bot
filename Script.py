@@ -1,111 +1,108 @@
 class Dead:
-    START_MSG = """≡ <b>Sᴛᴀʀᴛ ᴍᴇɴᴜ</b>
+    START_MSG = """✦ <b>ᴄᴀɴᴛᴀʀᴇʟʟᴀ</b> ✦
 
-ʜᴇʏ {mention}, ᴡᴇʟᴄᴏᴍᴇ! 👋
+ʜᴇʏ {mention} 👋
+ᴡᴇʟᴄᴏᴍᴇ ʙᴀᴄᴋ !
 
-<blockquote><b>I ᴀᴍ ʏᴏᴜʀ ᴜʟᴛɪᴍᴀᴛᴇ ᴀɴɪᴍᴇ ᴄᴏᴍᴘᴀɴɪᴏɴ ✨
+<blockquote expandable><b>✨ ʏᴏᴜʀ ᴜʟᴛɪᴍᴀᴛᴇ ᴀɴɪᴍᴇ ᴄᴏᴍᴘᴀɴɪᴏɴ</b>
 
-ɪ ᴀᴜᴛᴏᴍᴀᴛɪᴄᴀʟʟʏ sᴄʀᴀᴘᴇ ᴀɴᴅ ʙʀɪɴɢ ʏᴏᴜ ᴛʜᴇ ʟᴀᴛᴇsᴛ ᴀɴɪᴍᴇ ᴇᴘɪsᴏᴅᴇs ғʀᴏᴍ AɴɪWᴀᴛᴄʜ ᴅɪʀᴇᴄᴛʟʏ ɪɴᴛᴏ ʏᴏᴜʀ ᴄʜᴀᴛs ᴡɪᴛʜ ʙʟᴀᴢɪɴɢ ғᴀsᴛ sᴘᴇᴇᴅ ⚡
+ʟᴀᴛᴇsᴛ ᴇᴘɪsᴏᴅᴇs, ᴛʜᴇ ɴɪɢʜᴛ ᴛʜᴇʏ ᴀɪʀ, ʙʀɪɢʜᴛ ɪɴ ᴛʜɪs ᴄʜᴀᴛ —
+ᴍᴜʟᴛɪ-ǫᴜᴀʟɪᴛʏ, ᴅᴜᴀʟ ᴀᴜᴅɪᴏ, ʙᴀᴛᴄʜ ʀᴇᴀᴅʏ, ɴᴏ ʜᴀssʟᴇ.
 
-Fᴏʀɢᴇᴛ ᴛʜᴇ ʜᴀssʟᴇ ᴏғ sᴇᴀʀᴄʜɪɴɢ ᴏɴ ᴡᴇʙsɪᴛᴇs. Nᴏᴡ ᴇɴᴊᴏʏ sᴇᴀᴍʟᴇss ᴅᴏᴡɴʟᴏᴀᴅs ɪɴ ᴍᴜʟᴛɪᴘʟᴇ ǫᴜᴀʟɪᴛɪᴇs, ʙᴀᴛᴄʜ sᴇᴀsᴏɴ ᴜᴘʟᴏᴀᴅs, ᴀɴᴅ ʟɪɢʜᴛɴɪɴɢ ғᴀsᴛ ᴘʀᴏᴄᴇssɪɴɢ — ᴀʟʟ ᴀᴛ ᴏɴᴇ ᴘʟᴀᴄᴇ.
+<b>✦ ᴅᴇғᴀᴜʟᴛ sᴏᴜʀᴄᴇ</b> › ✨ ʀᴇ:ᴀɴɪᴍᴇ (ɴᴇᴡ)
+<b>✦ ǫᴜᴀʟɪᴛʏ</b> › 360ʘ / 720ʘ / 1080ʘ / ᴀᴜᴛᴏ
+<b>✦ ᴅᴏᴡɴʟᴏᴀᴅ</b> › sɪɴɢʟᴇ • ʀᴀɴɢᴇ • ʙᴀᴛᴄʜ</blockquote>
 
-Yᴏᴜʀ ғᴀᴠᴏᴜʀɪᴛᴇ ᴀɴɪᴍᴇs ᴀʀᴇ ɴᴏᴡ ᴊᴜsᴛ ᴀ ᴍᴇssᴀɢᴇ ᴀᴡᴀʏ.</b></blockquote>
+<blockquote><b>⚡ ᴇɴᴛᴇʀ ᴀɴ ᴀɴɪᴍᴇ ɴᴀᴍᴇ ɪɴ ᴛʜᴇ ᴄʜᴀᴛ ᴛᴏ sᴇᴀʀᴄʜ.</b>
+ᴘᴀsᴛᴇ ᴀ ʀᴇ:ᴀɴɪᴍᴇ ʟɪɴᴋ ᴛᴏ sᴋɪᴘ ᴛʜᴇ sᴇᴀʀᴄʜ.</blockquote>
 
-Exᴘʟᴏʀᴇ ᴛʜᴇ ʙᴜᴛᴛᴏɴs ʙᴇʟᴏᴡ ᴛᴏ ɢᴇᴛ sᴛᴀʀᴛᴇᴅ!</b>"""
+ᴘɪᴄᴋ ᴀ ᴍᴇɴᴜ ʙᴇʟᴏᴡ ⬇️"""
 
-    HELP_TXT = """≡ <b>Hᴇʟᴘ ᴍᴇɴᴜ</b>
+    HELP_TXT = """✦ <b>ʜᴇʟᴘ — ʜᴏᴡ ɪᴛ ᴡᴏʀᴋs</b>
 
-Hᴇʟʟᴏ {mention}, ʜᴇʀᴇ ᴀʀᴇ ᴍʏ ғᴇᴀᴛᴜʀᴇs ᴀɴᴅ ʜᴏᴡ ᴛᴏ ᴜsᴇ ᴍᴇ:
+ʜᴇʟʟᴏ {mention} ! ʜᴇʀᴇ's ᴇᴠᴇʀʏᴛʜɪɴɢ ɪɴ ᴏɴᴇ ᴘʟᴀᴄᴇ:
 
-<blockquote><b>✦ Aᴜᴛᴏ-Sᴄʀᴀᴘɪɴɢ › Aᴜᴛᴏᴍᴀᴛɪᴄᴀʟʟʏ ғᴇᴛᴄʜᴇs ɴᴇᴡ ᴇᴘɪsᴏᴅᴇs ᴅɪʀᴇᴄᴛʟʏ ғʀᴏᴍ AɴɪWᴀᴛᴄʜ sᴏ ʏᴏᴜ ɴᴇᴠᴇʀ ᴍɪss ᴏᴜᴛ.
-✦ Mᴜʟᴛɪ-Qᴜᴀʟɪᴛʏ › Pʀᴏᴠɪᴅᴇs ᴅᴏᴡɴʟᴏᴀᴅ ʟɪɴᴋs ɪɴ ᴍᴜʟᴛɪᴘʟᴇ ʀᴇsᴏʟᴜᴛɪᴏɴs ᴛᴏ ғɪᴛ ʏᴏᴜʀ ɴᴇᴛᴡᴏʀᴋ.
-✦ Bᴀᴛᴄʜ Uᴘʟᴏᴀᴅs › Cᴀᴘᴀʙʟᴇ ᴏғ ᴜᴘʟᴏᴀᴅɪɴɢ ᴡʜᴏʟᴇ sᴇᴀsᴏɴs sᴇᴀᴍʟᴇssʟʏ.
-✦ Fᴀsᴛ Sᴘᴇᴇᴅ › Uᴛɪʟɪᴢᴇs ʜɪɢʜ-sᴘᴇᴇᴅ sᴇʀᴠᴇʀs ғᴏʀ ʟɪɢʜᴛɴɪɴɢ-ғᴀsᴛ ᴅᴏᴡɴʟᴏᴀᴅ ᴀɴᴅ ᴜᴘʟᴏᴀᴅ ᴘʀᴏᴄᴇssɪɴɢ.
-✦ Eᴀsʏ Sᴇᴀʀᴄʜ › Sɪᴍᴘʟʏ ᴛʏᴘᴇ ᴛʜᴇ ɴᴀᴍᴇ ᴏғ ᴀɴʏ ᴀɴɪᴍᴇ ᴛᴏ ǫᴜɪᴄᴋʟʏ ғɪɴᴅ ᴇᴘɪsᴏᴅᴇs.
-✦ Rᴇʟɪᴀʙʟᴇ › 24/7 ᴜᴘᴛɪᴍᴇ ᴡɪᴛʜ ᴀᴜᴛᴏᴍᴀᴛɪᴄ ᴇʀʀᴏʀ ʜᴀɴᴅʟɪɴɢ ᴛᴏ sᴇʀᴠᴇ ʏᴏᴜ ᴀɴʏᴛɪᴍᴇ.</b></blockquote>
+<blockquote><b>🔍 sᴇᴀʀᴄʜ</b> — ᴛʏᴘᴇ ᴀɴ ᴀɴɪᴍᴇ ɴᴀᴍᴇ. ʀᴇsᴜʟᴛs ᴄᴏᴍᴇ ᴠɪᴀ ✨ ʀᴇ:ᴀɴɪᴍᴇ.
+<b>📺 ᴇᴘɪsᴏᴅᴇs</b> — ᴛᴀᴘ ᴀɴ ᴇᴘɪsᴏᴅᴇ, ᴀɴᴅ ᴄʜᴏᴏsᴇ ǫᴜᴀʟɪᴛʏ (360 / 720 / 1080 / ᴀᴜᴛᴏ).
+<b>🎞 ʙᴀᴛᴄʜ</b> — ᴅᴏᴡɴʟᴏᴀᴅ ᴀ ᴡʜᴏʟᴇ sᴇᴀsᴏɴ ᴏʀ ᴀ ʀᴀɴɢᴇ <code>1-12</code>.
+<b>🔗 ʟɪɴᴋs</b> — ᴘᴀsᴛᴇ ʀᴇ:ᴀɴɪᴍᴇ / ᴀɴɪᴋᴏᴛᴏ / ᴀɴɪᴍᴇsᴀʟᴛ ʟɪɴᴋs ᴅɪʀᴇᴄᴛʟʏ.
+<b>❤ ғᴀᴠs</b> — ᴀᴅᴍɪɴs ᴄᴀɴ sᴛᴀʀ ᴀɴɪᴍᴇs ᴀɴᴅ ᴄᴏᴍᴇ ʙᴀᴄᴋ ɪɴ ᴏɴᴇ ᴛᴀᴘ.</blockquote>
 
-<b>⚙️ Hᴏᴡ ᴛᴏ Usᴇ:</b>
-<blockquote><b>✦ Sᴇᴀʀᴄʜ ᴀɴ ᴀɴɪᴍᴇ ʙʏ sᴇɴᴅɪɴɢ ɪᴛs ɴᴀᴍᴇ ɪɴ ᴛʜᴇ ᴄʜᴀᴛ.
-✦ Sᴇʟᴇᴄᴛ ᴛʜᴇ ǫᴜᴀʟɪᴛʏ ʏᴏᴜ ᴡᴀɴᴛ ғʀᴏᴍ ᴛʜᴇ ɪɴʟɪɴᴇ ʙᴜᴛᴛᴏɴs.
-✦ Wᴀɪᴛ ғᴏʀ ᴛʜᴇ ʙᴏᴛ ᴛᴏ sᴄʀᴀᴘᴇ ᴀɴᴅ sᴇɴᴅ ᴛʜᴇ ғɪʟᴇ ᴅɪʀᴇᴄᴛʟʏ ᴛᴏ ʏᴏᴜ.</b></blockquote>"""
+<blockquote><b>⚙️ ᴍᴀɴᴀɢᴇ (/manage)</b> — ᴏɴɢᴏɪɴɢ ᴛᴏɢɢʟᴇ, ᴍᴀᴘᴘɪɴɢ ᴍᴏᴅᴇ,
+ᴇsᴘᴇᴄɪᴀʟʟʏ <b>ᴀᴄᴛɪᴠᴇ sᴏᴜʀᴄᴇ</b> — ᴛʜᴇ ᴅᴇғᴀᴜʟᴛ ɪs ɴᴏᴡ ✨ ʀᴇ:ᴀɴɪᴍᴇ.
+<b>📆 /schedule</b> — ᴛᴏᴅᴀʏ's ʀᴇʟᴇᴀsᴇ ʟɪsᴛ (sᴏᴜʀᴄᴇ-ʙᴀsᴇᴅ).
+<b>🗑 /autodel</b> — ᴀᴜᴛᴏ-ᴅᴇʟᴇᴛᴇ ᴜᴘʟᴏᴀᴅs ɪɴ ᴘʀɪᴠᴀᴛᴇ (ᴀᴅᴍɪɴ).</blockquote>
 
-    ABOUT_TXT = """≡ <b>Aʙᴏᴜᴛ ᴍᴇɴᴜ</b>
+<code>/start</code> <code>/help</code> <code>/manage</code> <code>/schedule</code> <code>/ping</code>"""
 
-Hᴇʀᴇ ɪs ɪɴғᴏʀᴍᴀᴛɪᴏɴ ᴀʙᴏᴜᴛ ᴍʏ ᴄʀᴇᴀᴛᴏʀs ᴀɴᴅ sᴘᴇᴄs:
+    ABOUT_TXT = """✦ <b>ᴀʙᴏᴜᴛ ᴄᴀɴᴛᴀʀᴇʟʟᴀ</b>
 
-<blockquote><b>
-✦ Cʀᴇᴀᴛᴏʀ › <a href='https://t.me/cantarellabots'>CᴀɴᴛᴀʀᴇʟʟᴀBᴏᴛs</a>
-✦ Fᴏᴜɴᴅᴇʀ › <a href='https://t.me/cantarellabots'>CᴀɴᴛᴀʀᴇʟʟᴀBᴏᴛs</a>
-✦ Dᴇᴠᴇʟᴏᴘᴇʀ › <a href='https://t.me/about_zani/117'>ZANI</a>
-✦ Dᴀᴛᴀʙᴀsᴇ › <a href='https://www.mongodb.com/docs/'>MᴏɴɢᴏDB</a>
-✦ Lɪʙʀᴀʀʏ › Kᴜʀɪɢʀᴀᴍ
-✦ Eɴɢɪɴᴇ › FFᴍᴘᴇɢ
-</b></blockquote>"""
-    
-    ADMIN_PANEL = """≡ <b>Aᴅᴍɪɴ ᴘᴀɴᴇʟ</b>
+<blockquote><b>✦ ᴄʀᴇᴀᴛᴏʀ</b> › <a href='https://t.me/cantarellabots'>CᴀɴᴛᴀʀᴇʟʟᴀBᴏᴛs</a>
+<b>✦ ᴅᴇғᴀᴜʟᴛ sᴏᴜʀᴄᴇ</b> › ✨ Re:Anime (reanime.to)
+<b>✦ ᴀʟsᴏ sᴜᴘᴘᴏʀᴛs</b> › AniKotoTV • AnimeSalt
+<b>✦ ᴇɴɢɪɴᴇ</b> › WzGram (ᴍᴛᴘʀᴏᴛᴏ) + FFmpeg
+<b>✦ ᴅᴀᴛᴀʙᴀsᴇ</b> › <a href='https://www.mongodb.com/docs/'>MongoDB</a>
 
-Wᴇʟᴄᴏᴍᴇ ᴛᴏ ᴛʜᴇ ᴀᴅᴍɪɴ ᴅᴀsʜʙᴏᴀʀᴅ.
+✦ ʙᴜɪʟᴛ ғᴏʀ ʟɪɢʜᴛɴɪɴɢ-ғᴀsᴛ ɪɴ-ᴄʜᴀᴛ ᴅᴏᴡɴʟᴏᴀᴅs — ᴅᴜᴀʟ ᴀᴜᴅɪᴏ, sᴏғᴛsᴜʙs, ʙᴀᴛᴄʜ ɴᴀɴᴅ ᴘʀᴏɢʀᴇss ʙᴀʀs.</b></blockquote>"""
 
-<blockquote><b>✦ Uᴘᴛɪᴍᴇ ›</b> <code>{uptime}</code>
-<b>✦ Pɪɴɢ ›</b> <code>{ping:.3f} ᴍꜱ</code>
-<b>✦ Usᴇʀs ›</b> <code>{total_users}</code></blockquote>
+    ADMIN_PANEL = """✦ <b>ᴀᴅᴍɪɴ ᴄᴏɴᴛʀᴏʟ</b>
 
-<b>⚙️ Hᴏᴡ ᴛᴏ ᴜꜱᴇ:</b>
-<blockquote><b>✦ Bᴀɴ › Bᴀɴs ᴀ ᴜsᴇʀ ʙʏ ID.
-✦ Uɴʙᴀɴ › Uɴʙᴀɴs ᴀ ʀᴇsᴛʀɪᴄᴛᴇᴅ ᴜsᴇʀ.
-✦ Bᴀɴ ʟɪsᴛ › Vɪᴇᴡs ᴀʟʟ ʙᴀɴɴᴇᴅ ᴜsᴇʀs.
-✦ Fsᴜʙ › Tᴏɢɢʟᴇs ғᴏʀᴄᴇ-sᴜʙsᴄʀɪᴘᴛɪᴏɴ.
-✦ Bʀᴏᴀᴅᴄᴀsᴛ › Mᴇssᴀɢᴇs ᴀʟʟ ᴜsᴇʀs.
-✦ Sᴛᴀᴛs › Sʜᴏᴡs ʙᴏᴛ ᴘᴇʀғᴏʀᴍᴀɴᴄᴇ.
-✦ Aᴅᴅ/Dᴇʟ Cʜᴀɴɴᴇʟ › Mᴀɴᴀɢᴇ Fsᴜʙs.</b></blockquote>"""
+<blockquote><b>✦ ᴜᴘᴛɪᴍᴇ</b> › <code>{uptime}</code>
+<b>✦ ᴘɪɴɢ</b> › <code>{ping:.3f} ᴍs</code>
+<b>✦ ᴜsᴇʀs</b> › <code>{total_users}</code></blockquote>
 
-    ADMIN_STATS = """≡ <b>Bᴏᴛ Sᴛᴀᴛᴜs</b>
+<blockquote><b>✦ ʙᴀɴ / ᴜɴʙᴀɴ</b> › ʀᴇsᴛʀɪᴄᴛ ᴀ ᴜsᴇʀ ʙʏ ɪᴅ
+<b>✦ ʙᴀɴ ʟɪsᴛ</b> › ᴀʟʟ ʙᴀɴɴᴇᴅ ᴜsᴇʀs
+<b>✦ ꜰsᴜʙ</b> › ᴛᴏɢɢʟᴇ ꜰᴏʀᴄᴇ-sᴜʙ ᴘᴇʀ ᴄʜᴀɴɴᴇʟ
+<b>✦ ʙʀᴏᴀᴅᴄᴀsᴛ</b> › ᴍᴇssᴀɢᴇ ᴇᴠᴇʀʏᴜsᴇʀ
+<b>✦ sᴛᴀᴛs</b> › ʙᴏᴛ ᴘᴇʀғᴏʀᴍᴀɴᴄᴇ
+<b>✦ ᴄʜᴀɴɴᴇʟs</b> › ᴀᴅᴅ / ᴅᴇʟ / ʟɪsᴛ ꜰ-sᴜʙ</blockquote>"""
 
-Hᴇʀᴇ ᴀʀᴇ ᴛʜᴇ ᴄᴜʀʀᴇɴᴛ ᴘᴇʀғᴏʀᴍᴀɴᴄᴇ ᴍᴇᴛʀɪᴄs:
+    ADMIN_STATS = """✦ <b>ʙᴏᴛ sᴛᴀᴛs</b>
 
-<blockquote><b>✦ Uᴘᴛɪᴍᴇ ›</b> <code>{uptime}</code>
-<b>✦ Pɪɴɢ ›</b> <code>{ping:.3f} ᴍꜱ</code>
-<b>✦ Vᴇʀsɪᴏɴ ›</b> 2.0.0
-<b>✦ Usᴇʀs ›</b> <code>{total_users}</code></blockquote>"""
+<blockquote><b>✦ ᴜᴘᴛɪᴍᴇ</b> › <code>{uptime}</code>
+<b>✦ ᴘɪɴɢ</b> › <code>{ping:.3f} ᴍs</code>
+<b>✦ ᴠᴇʀsɪᴏɴ</b> › 2.1.0 (ᴡᴢɢʀᴀᴍ + ʀᴇ:ᴀɴɪᴍᴇ ᴅᴇғᴀᴜʟᴛ)
+<b>✦ ᴜsᴇʀs</b> › <code>{total_users}</code></blockquote>"""
 
-    ADMIN_BAN_PROMPT = """≡ <b>Bᴀɴ Usᴇʀ</b>
+    ADMIN_BAN_PROMPT = """✦ <b>ʙᴀɴ ᴜsᴇʀ</b>
 
-Pʟᴇᴀsᴇ sᴇɴᴅ ᴛʜᴇ <b>Usᴇʀ ID</b> ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ʙᴀɴ ᴀʟᴏɴɢ ᴡɪᴛʜ ᴀɴ ᴏᴘᴛɪᴏɴᴀʟ ʀᴇᴀsᴏɴ.
+sᴇɴᴅ ᴛʜᴇ <b>ᴜsᴇʀ ɪᴅ</b> + ᴏᴘᴛɪᴏɴᴀʟ ʀᴇᴀsᴏɴ:
 
-<blockquote><b>Exᴀᴍᴘʟᴇ:</b>
+<blockquote><b>ᴇxᴀᴍᴘʟᴇ:</b>
 <code>123456789 sᴘᴀᴍᴍɪɴɢ</code></blockquote>
 
-(Tʏᴘᴇ /cancel ᴛᴏ ᴀʙᴏʀᴛ)"""
+(/cancel ᴛᴏ ᴀʙᴏʀᴛ)"""
 
-    ADMIN_UNBAN_PROMPT = """≡ <b>Uɴʙᴀɴ Usᴇʀ</b>
+    ADMIN_UNBAN_PROMPT = """✦ <b>ᴜɴʙᴀɴ ᴜsᴇʀ</b>
 
-Pʟᴇᴀsᴇ sᴇɴᴅ ᴛʜᴇ <b>Usᴇʀ ID</b> ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ᴜɴʙᴀɴ.
+sᴇɴᴅ ᴛʜᴇ <b>ᴜsᴇʀ ɪᴅ</b>:
 
-<blockquote><b>Exᴀᴍᴘʟᴇ:</b>
+<blockquote><b>ᴇxᴀᴍᴘʟᴇ:</b>
 <code>123456789</code></blockquote>
 
-(Tʏᴘᴇ /cancel ᴛᴏ ᴀʙᴏʀᴛ)"""
+(/cancel ᴛᴏ ᴀʙᴏʀᴛ)"""
 
-    ADMIN_ADDCHNL_PROMPT = """≡ <b>Aᴅᴅ Fsᴜʙ Cʜᴀɴɴᴇʟ</b>
+    ADMIN_ADDCHNL_PROMPT = """✦ <b>ᴀᴅᴅ ꜰ-sᴜʙ ᴄʜᴀɴɴᴇʟ</b>
 
-Pʟᴇᴀsᴇ sᴇɴᴅ ᴛʜᴇ <b>Cʜᴀɴɴᴇʟ ID</b> ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ᴀᴅᴅ.
+sᴇɴᴅ ᴛʜᴇ <b>ᴄʜᴀɴɴᴇʟ ɪᴅ</b>:
 
-<blockquote><b>Exᴀᴍᴘʟᴇ:</b>
+<blockquote><b>ᴇxᴀᴍᴘʟᴇ:</b>
 <code>-100XXXXXXXXXX</code></blockquote>
 
-(Tʏᴘᴇ /cancel ᴛᴏ ᴀʙᴏʀᴛ)"""
+(/cancel ᴛᴏ ᴀʙᴏʀᴛ)"""
 
-    ADMIN_DELCHNL_PROMPT = """≡ <b>Dᴇʟᴇᴛᴇ Fsᴜʙ Cʜᴀɴɴᴇʟ</b>
+    ADMIN_DELCHNL_PROMPT = """✦ <b>ᴅᴇʟᴇᴛᴇ ꜰ-sᴜʙ ᴄʜᴀɴɴᴇʟ</b>
 
-Pʟᴇᴀsᴇ sᴇɴᴅ ᴛʜᴇ <b>Cʜᴀɴɴᴇʟ ID</b> ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ᴅᴇʟᴇᴛᴇ (ᴏʀ sᴇɴᴅ <code>all</code>).
+sᴇɴᴅ ᴛʜᴇ <b>ᴄʜᴀɴɴᴇʟ ɪᴅ</b> (ᴏʀ <code>all</code>):
 
-<blockquote><b>Exᴀᴍᴘʟᴇ:</b>
+<blockquote><b>ᴇxᴀᴍᴘʟᴇ:</b>
 <code>-100XXXXXXXXXX</code></blockquote>
 
-(Tʏᴘᴇ /cancel ᴛᴏ ᴀʙᴏʀᴛ)"""
+(/cancel ᴛᴏ ᴀʙᴏʀᴛ)"""
 
-    ADMIN_BROADCAST_PROMPT = """≡ <b>Bʀᴏᴀᴅᴄᴀsᴛ</b>
+    ADMIN_BROADCAST_PROMPT = """✦ <b>ʙʀᴏᴀᴅᴄᴀsᴛ</b>
 
-Pʟᴇᴀsᴇ sᴇɴᴅ ᴛʜᴇ <b>ᴍᴇssᴀɢᴇ</b> ᴏʀ <b>ᴘʜᴏᴛᴏ</b> ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ʙʀᴏᴀᴅᴄᴀsᴛ ᴛᴏ ᴀʟʟ ᴜsᴇʀs.
+sᴇɴᴅ ᴛʜᴇ <b>ᴍᴇssᴀɢᴇ</b> ᴏʀ <b>ᴘʜᴏᴛᴏ</b> ᴛᴏ ʙʀᴏᴀᴅᴄᴀsᴛ ᴛᴏ ᴀʟʟ ᴜsᴇʀs.
 
-(Tʏᴘᴇ /cancel ᴛᴏ ᴀʙᴏʀᴛ)"""
+(/cancel ᴛᴏ ᴀʙᴏʀᴛ)"""

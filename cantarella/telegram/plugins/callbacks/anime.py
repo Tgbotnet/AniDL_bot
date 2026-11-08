@@ -6,11 +6,11 @@ from pyrogram.enums import ParseMode, ChatType
 from pyrogram.types import InlineKeyboardMarkup
 from cantarella.button import Button as InlineKeyboardButton
 
-from cantarella.core.state import user_episodes, user_search_results, user_range_data
+from cantarella.core.state import user_episodes, user_search_results, user_range_data, user_favorites_cache
 from cantarella.core.database import db
 from cantarella.core.images import get_random_image
 from config import *
-from .helpers import check_fsub, send_fsub_prompt
+from .helpers import check_fsub, send_fsub_prompt, safe_answer
 #@cantarellabots
 # ─────────────────────────────────────────────
 #  Anime select & episode pagination
@@ -18,11 +18,32 @@ from .helpers import check_fsub, send_fsub_prompt
 
 @Client.on_callback_query(filters.regex("^anime_"))
 async def on_anime_select(client: Client, callback_query):
+    await safe_answer(callback_query, "⏳ Loading episodes...")
     if not await check_fsub(client, callback_query.from_user.id):
-        await callback_query.answer("🔒 ᴘʟᴇᴀꜱᴇ ᴊᴏɪɴ ᴛʜᴇ ᴄʜᴀɴɴᴇʟ ꜰɪʀꜱᴛ!", show_alert=True)
+        try:
+            await callback_query.edit_message_text(
+                "<blockquote>🔒 <b>ʘʟᴇᴀsᴇ ᴊᴏɪɴ ᴛʜᴇ ᴄʜᴀɴɴᴇʟ ꜰɪʀsᴛ!</b></blockquote>",
+                parse_mode=ParseMode.HTML,
+            )
+        except Exception:
+            pass
         return await send_fsub_prompt(client, callback_query.message)
 
-    anime_id = callback_query.data.split("_")[1]
+    data = callback_query.data or ""
+    anime_id = None
+    if data.startswith("anime_idx_"):
+        try:
+            idx = int(data.rsplit("_", 1)[-1])
+        except (ValueError, IndexError):
+            idx = None
+        results = user_search_results.get(callback_query.from_user.id) or []
+        if idx is not None and 0 <= idx < len(results):
+            anime_id = results[idx].get("id")
+    else:
+        anime_id = data.split("_", 1)[1] if "_" in data else ""
+    if not anime_id:
+        await safe_answer(callback_query, "❌ Search expired — search again.")
+        return
 
     active_source = await db.get_user_setting(0, "active_source", "reanime")
     if active_source == "animetsu":
@@ -42,7 +63,13 @@ async def on_anime_select(client: Client, callback_query):
         entries = await client.loop.run_in_executor(None, downloader.list_episodes, url)
 
     if not entries:
-        await callback_query.answer("❌ ɴᴏ ᴇᴘɪꜱᴏᴅᴇꜱ ꜰᴏᴜɴᴅ.")
+        try:
+            await callback_query.edit_message_text(
+                "<blockquote>❌ <b>ɴᴏ ᴇᴘɪsᴏᴅᴇs ғᴏᴜɴᴅ.</b></blockquote>",
+                parse_mode=ParseMode.HTML,
+            )
+        except Exception:
+            pass
         return
 
     user_episodes[callback_query.from_user.id] = {
@@ -65,10 +92,18 @@ async def show_episodes_page(client, callback_query, page):
     end             = start + 20
     current_entries = entries[start:end]
 
+    # Two-column grid (was 20 single rows — clipped on small screens).
     buttons = []
-    for i, entry in enumerate(current_entries):
-        ep_idx = start + i
-        buttons.append([InlineKeyboardButton(f"ᴇᴘɪꜱᴏᴅᴇ {ep_idx+1}", callback_data=f"ep_{ep_idx}")])
+    for i in range(0, len(current_entries), 2):
+        row = []
+        for j in (i, i + 1):
+            if j >= len(current_entries):
+                break
+            ep_idx = start + j
+            entry = current_entries[j]
+            ep_label = entry.get("ep_number") or str(ep_idx + 1)
+            row.append(InlineKeyboardButton(f"▶ {ep_label}", callback_data=f"ep_{ep_idx}"))
+        buttons.append(row)
 
     nav_row = []
     if page > 0:
@@ -91,11 +126,11 @@ async def show_episodes_page(client, callback_query, page):
     user_id = callback_query.from_user.id
     is_admin = user_id == OWNER_ID or await db.is_admin(user_id)
 
-    range_btn = InlineKeyboardButton("🔢 ʀᴀɴɢᴇ ᴅᴏᴡɴʟᴏᴀᴅ", callback_data="range_dl_prompt")
+    range_btn = InlineKeyboardButton("🔢 ʀᴀɴɢᴇ", callback_data="range_dl_prompt")
     if is_admin:
         favorites = await db.get_favorites(user_id)
         is_fav = any(f['id'] == data['url'].split('/')[-1] for f in favorites)
-        fav_btn = InlineKeyboardButton("❤ ʀᴇᴍᴏᴠᴇ ғᴀᴠ", callback_data=f"rem_fav_{data['url'].split('/')[-1]}") if is_fav else InlineKeyboardButton("🤍 ᴀᴅᴅ ғᴀᴠ", callback_data=f"add_fav_{data['url'].split('/')[-1]}")
+        fav_btn = InlineKeyboardButton("❤ ʀᴇᴍᴏᴠᴇ", callback_data="rem_fav") if is_fav else InlineKeyboardButton("🤍 ᴀᴅᴅ", callback_data="add_fav")
         buttons.append([fav_btn, range_btn])
     else:
         buttons.append([range_btn])
@@ -122,12 +157,14 @@ async def show_episodes_page(client, callback_query, page):
 
 @Client.on_callback_query(filters.regex("^eps_page_"))
 async def on_eps_page(client: Client, callback_query):
+    await safe_answer(callback_query)
     page = int(callback_query.data.split("_")[2])
     await show_episodes_page(client, callback_query, page)
 
 
 @Client.on_callback_query(filters.regex("^back_to_search$"))
 async def on_back_to_search(client: Client, callback_query):
+    await safe_answer(callback_query)
     user_id = callback_query.from_user.id
     results = user_search_results.get(user_id)
     if not results:
@@ -158,36 +195,42 @@ async def on_back_to_search(client: Client, callback_query):
         )
 
 
-@Client.on_callback_query(filters.regex("^add_fav_"))
+@Client.on_callback_query(filters.regex("^add_fav(_.*)?$"))
 async def on_add_favorite(client: Client, callback_query):
     user_id = callback_query.from_user.id
     if user_id != OWNER_ID and not await db.is_admin(user_id):
         return await callback_query.answer("❌ ᴛʜɪꜱ ꜰᴇᴀᴛᴜʀᴇ ɪꜱ ꜰᴏʀ ᴀᴅᴍɪɴꜱ ᴏɴʟʏ.", show_alert=True)
 
-    anime_id = callback_query.data.split("_")[2]
     data = user_episodes.get(user_id)
     if not data:
+        return await callback_query.answer("❌ ꜱᴇꜱꜱɪᴏɴ ᴇxᴘɪʀᴇᴅ.")
+    raw = callback_query.data or ""
+    anime_id = raw.split("_", 1)[1] if raw.startswith("add_fav_") and len(raw) > 8 else (data.get('url', '') or '').rstrip('/').split('/')[-1]
+    if not anime_id:
         return await callback_query.answer("❌ ꜱᴇꜱꜱɪᴏɴ ᴇxᴘɪʀᴇᴅ.")
 
     await db.add_favorite(user_id, anime_id, data['title'])
     await callback_query.answer("✅ ᴀᴅᴅᴇᴅ ᴛᴏ ғᴀᴠᴏʀɪᴛᴇꜱ!", show_alert=True)
     await show_episodes_page(client, callback_query, data.get('page', 0))
 
-@Client.on_callback_query(filters.regex("^rem_fav_"))
+@Client.on_callback_query(filters.regex("^rem_fav(_.*)?$"))
 async def on_rem_favorite(client: Client, callback_query):
     user_id = callback_query.from_user.id
     if user_id != OWNER_ID and not await db.is_admin(user_id):
         return await callback_query.answer("❌ ᴛʜɪꜱ ꜰᴇᴀᴛᴜʀᴇ ɪꜱ ꜰᴏʀ ᴀᴅᴍɪɴꜱ ᴏɴʟʏ.", show_alert=True)
 
-    anime_id = callback_query.data.split("_")[2]
-    await db.remove_favorite(user_id, anime_id)
-    await callback_query.answer("❌ ʀᴇᴍᴏᴠᴇᴅ ғʀᴏᴍ ғᴀᴠᴏʀɪᴛᴇꜱ!", show_alert=True)
     data = user_episodes.get(user_id)
+    raw = callback_query.data or ""
+    anime_id = raw.split("_", 1)[1] if raw.startswith("rem_fav_") and len(raw) > 8 else ((data.get('url', '') or '').rstrip('/').split('/')[-1] if data else "")
+    if anime_id:
+        await db.remove_favorite(user_id, anime_id)
+    await callback_query.answer("❌ ʀᴇᴍᴏᴠᴇᴅ ғʀᴏᴍ ғᴀᴠᴏʀɪᴛᴇꜱ!", show_alert=True)
     if data:
         await show_episodes_page(client, callback_query, data.get('page', 0))
 
 @Client.on_callback_query(filters.regex("^range_dl_prompt$"))
 async def on_range_dl_prompt(client: Client, callback_query):
+    await safe_answer(callback_query)
     user_id = callback_query.from_user.id
     if user_id not in user_episodes:
         return await callback_query.answer("❌ ꜱᴇꜱꜱɪᴏɴ ᴇxᴘɪʀᴇᴅ.")
@@ -206,6 +249,7 @@ async def on_range_dl_prompt(client: Client, callback_query):
 
 @Client.on_callback_query(filters.regex("^cancel_range$"))
 async def on_cancel_range(client: Client, callback_query):
+    await safe_answer(callback_query)
     user_id = callback_query.from_user.id
     if user_id in user_range_data:
         msg_id = user_range_data[user_id].get('msg_id')
@@ -288,6 +332,7 @@ async def show_range_quality_selection(client, message, start, end, edit=False, 
 
 @Client.on_callback_query(filters.regex("^trq_"))
 async def on_toggle_range_quality(client: Client, callback_query):
+    await safe_answer(callback_query)
     user_id = callback_query.from_user.id
     if user_id not in user_range_data:
         # Try to recover from message
@@ -408,10 +453,12 @@ async def on_favorites_cb(client: Client, callback_query):
 
     if not favorites:
         return await callback_query.answer("❤ ʏᴏᴜʀ ғᴀᴠᴏʀɪᴛᴇꜱ ʟɪꜱᴛ ɪꜱ ᴇᴍᴘᴛʏ.", show_alert=True)
+    await safe_answer(callback_query)
+    user_favorites_cache[user_id] = favorites
 
     buttons = []
-    for fav in favorites:
-        buttons.append([InlineKeyboardButton(fav['title'], callback_data=f"anime_{fav['id']}")])
+    for idx, fav in enumerate(favorites):
+        buttons.append([InlineKeyboardButton(fav['title'], callback_data=f"favsel_{idx}")])
 
     buttons.append([InlineKeyboardButton("⬅️ ʙᴀᴄᴋ", callback_data="start"), InlineKeyboardButton("❌ ᴄʟᴏꜱᴇ", callback_data="close")])
 
@@ -421,31 +468,49 @@ async def on_favorites_cb(client: Client, callback_query):
         parse_mode=ParseMode.HTML
     )
 
+
+@Client.on_callback_query(filters.regex("^favsel_"))
+async def on_fav_select(client: Client, callback_query):
+    await safe_answer(callback_query, "⏳ Loading episodes...")
+    try:
+        idx = int(callback_query.data.rsplit("_", 1)[-1])
+        favs = user_favorites_cache.get(callback_query.from_user.id) or await db.get_favorites(callback_query.from_user.id)
+        fav_id = favs[idx]["id"] if 0 <= idx < len(favs) else None
+    except Exception:
+        fav_id = None
+    if not fav_id:
+        await safe_answer(callback_query, "❌ Favorite expired — open favorites again.")
+        return
+    # Delegate to the same episode loading as anime selection.
+    callback_query.data = f"anime_{fav_id}"
+    await on_anime_select(client, callback_query)
+
 @Client.on_callback_query(filters.regex("^ep_"))
 async def on_episode_select(client: Client, callback_query):
     if not await check_fsub(client, callback_query.from_user.id):
         await callback_query.answer("🔒 ᴘʟᴇᴀꜱᴇ ᴊᴏɪɴ ᴛʜᴇ ᴄʜᴀɴɴᴇʟ ꜰɪʀꜱᴛ!", show_alert=True)
         return await send_fsub_prompt(client, callback_query.message)
 
-    ep_idx  = int(callback_query.data.split("_")[1])
+    ep_idx  = int(callback_query.data.rsplit("_", 1)[-1])
     user_id = callback_query.from_user.id
     if user_id not in user_episodes:
         await callback_query.answer("❌ ꜱᴇꜱꜱɪᴏɴ ᴇxᴘɪʀᴇᴅ.")
         return
+    await safe_answer(callback_query)
 
     page = ep_idx // 20
     buttons = [
         [
             InlineKeyboardButton("360ᴘ",  callback_data=f"dl_360_{ep_idx}"),
             InlineKeyboardButton("720ᴘ",  callback_data=f"dl_720_{ep_idx}"),
-            InlineKeyboardButton("1080ᴘ", callback_data=f"dl_1080_{ep_idx}")
+            InlineKeyboardButton("1080ᴘ", callback_data=f"dl_1080_{ep_idx}"),
         ],
-        [InlineKeyboardButton("ᴀᴜᴛᴏ (ʙᴇꜱᴛ)",    callback_data=f"dl_auto_{ep_idx}")],
-        [InlineKeyboardButton("ᴀʟʟ ǫᴜᴀʟɪᴛɪᴇꜱ", callback_data=f"dl_all_{ep_idx}")],
+        [InlineKeyboardButton("⚡ ᴀᴜᴛᴏ (ʙᴇsᴛ)",  callback_data=f"dl_auto_{ep_idx}"),
+         InlineKeyboardButton("📦 ᴀʟʟ",          callback_data=f"dl_all_{ep_idx}")],
         [
             InlineKeyboardButton("🔙 ʙᴀᴄᴋ", callback_data=f"eps_page_{page}"),
-            InlineKeyboardButton("❌ ᴄʟᴏꜱᴇ", callback_data="cancel")
-        ]
+            InlineKeyboardButton("❌ ᴄʟᴏꜱᴇ", callback_data="cancel"),
+        ],
     ]
     try:
         await callback_query.edit_message_caption(

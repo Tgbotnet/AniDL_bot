@@ -17,6 +17,7 @@ from pyrogram.errors import (
     FloodWait, InputUserDeactivated, UserIsBlocked,
     PeerIdInvalid, RPCError
 )
+from cantarella.telegram.plugins.callbacks.helpers import safe_answer
 from cantarella.button import Button as InlineKeyboardButton
 from pyrogram.types import (
     InlineKeyboardMarkup,
@@ -79,6 +80,7 @@ async def send_msg(user_id, message):
 
 @Client.on_callback_query(filters.regex("^admin_panel$") & admin)
 async def cb_admin_panel(client: Client, callback_query):
+    await safe_answer(callback_query)
     # Silently clear any pending admin state when returning to the dashboard
     user_id = callback_query.from_user.id
     if user_id in admin_states:
@@ -128,6 +130,7 @@ async def cb_admin_panel(client: Client, callback_query):
 
 @Client.on_callback_query(filters.regex("^admin_stats$") & admin)
 async def cb_stats(client: Client, callback_query):
+    await safe_answer(callback_query)
     start_t     = time.time()
     total_users = await db.total_users_count()
     end_t       = time.time()
@@ -153,6 +156,7 @@ async def cb_stats(client: Client, callback_query):
 
 @Client.on_callback_query(filters.regex("^admin_ban_prompt$") & admin)
 async def cb_ban_prompt(client: Client, callback_query):
+    await safe_answer(callback_query)
     admin_states[callback_query.from_user.id] = "ban"
     await callback_query.edit_message_text(
         Dead.ADMIN_BAN_PROMPT,
@@ -165,6 +169,7 @@ async def cb_ban_prompt(client: Client, callback_query):
 
 @Client.on_callback_query(filters.regex("^admin_unban_prompt$") & admin)
 async def cb_unban_prompt(client: Client, callback_query):
+    await safe_answer(callback_query)
     admin_states[callback_query.from_user.id] = "unban"
     await callback_query.edit_message_text(
         Dead.ADMIN_UNBAN_PROMPT,
@@ -468,6 +473,7 @@ async def cb_banned_list(client: Client, callback_query):
 
 @Client.on_callback_query(filters.regex("^admin_addchnl_prompt$") & admin)
 async def cb_addchnl_prompt(client: Client, callback_query):
+    await safe_answer(callback_query)
     admin_states[callback_query.from_user.id] = "addchnl"
     await callback_query.edit_message_text(
         Dead.ADMIN_ADDCHNL_PROMPT,
@@ -480,6 +486,7 @@ async def cb_addchnl_prompt(client: Client, callback_query):
 
 @Client.on_callback_query(filters.regex("^admin_delchnl_prompt$") & admin)
 async def cb_delchnl_prompt(client: Client, callback_query):
+    await safe_answer(callback_query)
     admin_states[callback_query.from_user.id] = "delchnl"
     await callback_query.edit_message_text(
         Dead.ADMIN_DELCHNL_PROMPT,
@@ -492,9 +499,20 @@ async def cb_delchnl_prompt(client: Client, callback_query):
 
 @Client.on_callback_query(filters.regex("^admin_listchnl$") & admin)
 async def cb_listchnl(client: Client, callback_query):
+    await safe_answer(callback_query)
     channels = await db.show_channels()
     if not channels:
-        return await callback_query.answer("❌ Nᴏ ғᴏʀᴄᴇ-sᴜʙ ᴄʜᴀɴɴᴇʟs ғᴏᴜɴᴅ.", show_alert=True)
+        try:
+            await callback_query.edit_message_text(
+                "<blockquote>❌ <b>ɴᴏ ғᴏʀᴄᴇ-sᴜʙ ᴄʜᴀɴɴᴇʟs ғᴏᴜɴᴅ.</b></blockquote>",
+                reply_markup=InlineKeyboardMarkup([
+                    [InlineKeyboardButton("⬅️ ʙᴀᴄᴋ", callback_data="admin_panel")]
+                ]),
+                parse_mode=ParseMode.HTML,
+            )
+        except Exception:
+            pass
+        return
 
     result = "≡ <b>Fsᴜʙ Cʜᴀɴɴᴇʟs:</b>\n<blockquote>"
     for ch_id in channels:
@@ -522,6 +540,7 @@ async def cb_listchnl(client: Client, callback_query):
 
 @Client.on_callback_query(filters.regex("^admin_broadcast$") & admin)
 async def cb_broadcast_prompt(client: Client, callback_query):
+    await safe_answer(callback_query)
     admin_states[callback_query.from_user.id] = "broadcast"
     await callback_query.edit_message_text(
         Dead.ADMIN_BROADCAST_PROMPT,

@@ -2,6 +2,7 @@
 from pyrogram import Client, filters
 from pyrogram.enums import ParseMode
 from pyrogram.types import InlineKeyboardMarkup
+from cantarella.telegram.plugins.callbacks.helpers import safe_answer
 from cantarella.button import Button as InlineKeyboardButton
 from config import *
 
@@ -34,21 +35,21 @@ async def on_toggle_ongoing(client: Client, callback_query):
     source_display = _SOURCE_DISPLAY.get(active_source, "✨ REANIME")
 
     caption = (
-        "<blockquote><b>⚙️ ʙᴏᴛ ꜱᴇᴛᴛɪɴɢꜱ</b>\n\n"
-        f"<b>📡 ᴏɴɢᴏɪɴɢ ᴀᴜᴛᴏ-ᴅᴏᴡɴʟᴏᴀᴅ:</b> {status_icon}\n"
-        f"<b>🔗 ᴍᴀᴘᴘɪɴɢ ᴍᴏᴅᴇ:</b> {mapping_status_icon}\n"
-        f"<b>📡 ᴀᴄᴛɪᴠᴇ ꜱᴏᴜʀᴄᴇ:</b> {source_display}\n\n"
-        "ᴡʜᴇɴ ᴏɴ, ᴛʜᴇ ʙᴏᴛ ᴀᴜᴛᴏᴍᴀᴛɪᴄᴀʟʟʏ ᴄʜᴇᴄᴋꜱ ꜰᴏʀ ɴᴇᴡ ᴀɴɪᴍᴇ ᴇᴘɪꜱᴏᴅᴇꜱ ᴀɴᴅ ᴅᴏᴡɴʟᴏᴀᴅꜱ ᴛʜᴇᴍ.</blockquote>"
+        "<blockquote expandable><b>✦ sᴇᴛᴛɪɴɢs</b>\n\n"
+        f"<b>📡 ᴏɴɢᴏɪɴɢ</b> › {status_icon}\n"
+        f"<b>🔗 ᴍᴀᴘᴘɪɴɢ</b> › {mapping_status_icon}\n"
+        f"<b>✨ sᴏᴜʀᴄᴇ</b> › {source_display}\n\n"
+        "ᴏɴ — ᴀᴜᴛᴏ-ᴅᴏᴡɴʟᴏᴀᴅ ɴᴇᴡ ᴇᴘɪsᴏᴅᴇs.</blockquote>"
     )
     mapping_toggle_label = "🔄 ᴍᴀᴘᴘɪɴɢ: ꜱɪɴɢʟᴇ" if mapping_batch_mode else "🔄 ᴍᴀᴘᴘɪɴɢ: ʙᴀᴛᴄʜ"
     _next = _SOURCE_NEXT.get(active_source, "aniwatch")
     source_toggle_label = f"🔄 ꜱᴡɪᴛᴄʜ ᴛᴏ {_next.upper()}"
 
     buttons = InlineKeyboardMarkup([
-        [InlineKeyboardButton(toggle_label, callback_data="toggle_ongoing")],
-        [InlineKeyboardButton(mapping_toggle_label, callback_data="toggle_mapping_mode")],
+        [InlineKeyboardButton(toggle_label, callback_data="toggle_ongoing"),
+         InlineKeyboardButton(mapping_toggle_label, callback_data="toggle_mapping_mode")],
         [InlineKeyboardButton(source_toggle_label, callback_data="toggle_active_source")],
-        [InlineKeyboardButton("⬅️ ʙᴀᴄᴋ",  callback_data="start")]
+        [InlineKeyboardButton("⌂ ʜᴏᴍᴇ",  callback_data="start")],
     ])
     try:
         await callback_query.edit_message_caption(
@@ -79,16 +80,15 @@ async def on_toggle_mapping_mode(client: Client, callback_query):
     action = "BATCH" if new_mode else "SINGLE"
 
     caption = (
-        "<blockquote><b>⚙️ ʙᴏᴛ ꜱᴇᴛᴛɪɴɢꜱ</b>\n\n"
-        f"<b>📡 ᴏɴɢᴏɪɴɢ ᴀᴜᴛᴏ-ᴅᴏᴡɴʟᴏᴀᴅ:</b> {status_icon}\n"
-        f"<b>🔗 ᴍᴀᴘᴘɪɴɢ ᴍᴏᴅᴇ:</b> {mapping_status_icon}\n\n"
-        "ᴡʜᴇɴ ᴏɴ, ᴛʜᴇ ʙᴏᴛ ᴀᴜᴛᴏᴍᴀᴛɪᴄᴀʟʟʏ ᴄʜᴇᴄᴋꜱ ꜰᴏʀ ɴᴇᴡ ᴀɴɪᴍᴇ ᴇᴘɪꜱᴏᴅᴇꜱ ᴀɴᴅ ᴅᴏᴡɴʟᴏᴀᴅꜱ ᴛʜᴇᴍ.\n"
-        "ᴡʜᴇɴ ᴏꜰꜰ, ᴏɴʟʏ ᴍᴀɴᴜᴀʟ ꜱᴇᴀʀᴄʜ & ᴅᴏᴡɴʟᴏᴀᴅ ᴡᴏʀᴋꜱ.</blockquote>"
+        "<blockquote expandable><b>✦ sᴇᴛᴛɪɴɢs</b>\n\n"
+        f"<b>📡 ᴏɴɢᴏɪɴɢ</b> › {status_icon}\n"
+        f"<b>🔗 ᴍᴀᴘᴘɪɴɢ</b> › {mapping_status_icon}\n\n"
+        "ᴏɴ — ᴀᴜᴛᴏ-ᴅᴏᴡɴʟᴏᴀᴅ. ᴏғғ — ᴍᴀɴᴜᴀʟ ᴏɴʟʏ.</blockquote>"
     )
     buttons = InlineKeyboardMarkup([
-        [InlineKeyboardButton(toggle_label, callback_data="toggle_ongoing")],
-        [InlineKeyboardButton(mapping_toggle_label, callback_data="toggle_mapping_mode")],
-        [InlineKeyboardButton("⬅️ ʙᴀᴄᴋ",  callback_data="start")]
+        [InlineKeyboardButton(toggle_label, callback_data="toggle_ongoing"),
+         InlineKeyboardButton(mapping_toggle_label, callback_data="toggle_mapping_mode")],
+        [InlineKeyboardButton("⌂ ʜᴏᴍᴇ",  callback_data="start")],
     ])
 
     try:
@@ -134,18 +134,18 @@ async def on_toggle_active_source(client: Client, callback_query):
     source_toggle_label = f"🔄 ꜱᴡɪᴛᴄʜ ᴛᴏ {_next2.upper()}"
 
     caption = (
-        "<blockquote><b>⚙️ ʙᴏᴛ ꜱᴇᴛᴛɪɴɢꜱ</b>\n\n"
-        f"<b>📡 ᴏɴɢᴏɪɴɢ ᴀᴜᴛᴏ-ᴅᴏᴡɴʟᴏᴀᴅ:</b> {status_icon}\n"
-        f"<b>🔗 ᴍᴀᴘᴘɪɴɢ ᴍᴏᴅᴇ:</b> {mapping_status_icon}\n"
-        f"<b>📡 ᴀᴄᴛɪᴠᴇ ꜱᴏᴜʀᴄᴇ:</b> {source_display}\n\n"
-        "ᴡʜᴇɴ ᴏɴ, ᴛʜᴇ ʙᴏᴛ ᴀᴜᴛᴏᴍᴀᴛɪᴄᴀʟʟʏ ᴄʜᴇᴄᴋꜱ ꜰᴏʀ ɴᴇᴡ ᴀɴɪᴍᴇ ᴇᴘɪꜱᴏᴅᴇꜱ ᴀɴᴅ ᴅᴏᴡɴʟᴏᴀᴅꜱ ᴛʜᴇᴍ.</blockquote>"
+        "<blockquote expandable><b>✦ sᴇᴛᴛɪɴɢs</b>\n\n"
+        f"<b>📡 ᴏɴɢᴏɪɴɢ</b> › {status_icon}\n"
+        f"<b>🔗 ᴍᴀᴘᴘɪɴɢ</b> › {mapping_status_icon}\n"
+        f"<b>✨ sᴏᴜʀᴄᴇ</b> › {source_display}\n\n"
+        "ᴏɴ — ᴀᴜᴛᴏ-ᴅᴏᴡɴʟᴏᴀᴅ ɴᴇᴡ ᴇᴘɪsᴏᴅᴇs.</blockquote>"
     )
 
     buttons = InlineKeyboardMarkup([
-        [InlineKeyboardButton(toggle_label, callback_data="toggle_ongoing")],
-        [InlineKeyboardButton(mapping_toggle_label, callback_data="toggle_mapping_mode")],
+        [InlineKeyboardButton(toggle_label, callback_data="toggle_ongoing"),
+         InlineKeyboardButton(mapping_toggle_label, callback_data="toggle_mapping_mode")],
         [InlineKeyboardButton(source_toggle_label, callback_data="toggle_active_source")],
-        [InlineKeyboardButton("⬅️ ʙᴀᴄᴋ",  callback_data="start")]
+        [InlineKeyboardButton("⌂ ʜᴏᴍᴇ",  callback_data="start")],
     ])
 
     try:

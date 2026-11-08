@@ -2,6 +2,7 @@
 from pyrogram import Client, filters
 from pyrogram.enums import ParseMode, ChatMemberStatus
 from pyrogram.types import InlineKeyboardMarkup, ChatMemberUpdated
+from cantarella.telegram.plugins.callbacks.helpers import safe_answer
 from cantarella.button import Button as InlineKeyboardButton
 from config import *
 from cantarella.core.database import db
@@ -13,9 +14,14 @@ from .admin import admin
 
 @Client.on_callback_query(filters.regex("^fsub_mode$") & admin)
 async def cb_fsub_mode(client: Client, callback_query):
+    await safe_answer(callback_query)
     channels = await db.show_channels()
     if not channels:
-        return await callback_query.answer("❌ ɴᴏ ꜰᴏʀᴄᴇ-ꜱᴜʙ ᴄʜᴀɴɴᴇʟꜱ ꜰᴏᴜɴᴅ.", show_alert=True)
+        try:
+            await callback_query.edit_message_text("<blockquote>❌ <b>ɴᴏ ғᴏʀᴄᴇ-sᴜʙ ᴄʜᴀɴɴᴇʟs ғᴏᴜɴᴅ.</b></blockquote>", parse_mode=ParseMode.HTML)
+        except Exception:
+            pass
+        return
 
     buttons = []
     for ch_id in channels:
@@ -37,6 +43,7 @@ async def cb_fsub_mode(client: Client, callback_query):
 
 @Client.on_callback_query(filters.regex("^rfs_ch_"))
 async def cb_rfs_channel(client: Client, callback_query):
+    await safe_answer(callback_query)
     cid = int(callback_query.data.split("_")[2])
     try:
         chat     = await client.get_chat(cid)
@@ -56,18 +63,21 @@ async def cb_rfs_channel(client: Client, callback_query):
             parse_mode=ParseMode.HTML
         )
     except Exception:
-        await callback_query.answer("ꜰᴀɪʟᴇᴅ ᴛᴏ ꜰᴇᴛᴄʜ ᴄʜᴀɴɴᴇʟ ɪɴꜰᴏ", show_alert=True)
+        try:
+            await callback_query.edit_message_text("<blockquote>❌ <b>ꜰᴀɪʟᴇᴅ ᴛᴏ ꜰᴇᴛᴄʜ ᴄʜᴀɴɴᴇʟ ɪɴꜰᴏ.</b></blockquote>", parse_mode=ParseMode.HTML)
+        except Exception:
+            pass
 
 
 @Client.on_callback_query(filters.regex("^rfs_toggle_"))
 async def cb_rfs_toggle(client: Client, callback_query):
+    await safe_answer(callback_query)
     parts    = callback_query.data.split("_")[2:]
     cid      = int(parts[0])
     action   = parts[1]
     mode     = "on" if action == "on" else "off"
 
     await db.set_channel_mode(cid, mode)
-    await callback_query.answer(f"ꜰᴏʀᴄᴇ-ꜱᴜʙ ꜱᴇᴛ ᴛᴏ {'ON' if mode == 'on' else 'OFF'}")
 
     chat     = await client.get_chat(cid)
     status   = "ON" if mode == "on" else "OFF"
@@ -88,6 +98,7 @@ async def cb_rfs_toggle(client: Client, callback_query):
 
 @Client.on_callback_query(filters.regex("^fsub_back$"))
 async def cb_fsub_back(client: Client, callback_query):
+    await safe_answer(callback_query)
     channels = await db.show_channels()
     buttons  = []
     for cid in channels:

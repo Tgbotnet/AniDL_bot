@@ -1,6 +1,7 @@
 #@cantarellabots
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InputMediaPhoto
+from cantarella.telegram.plugins.callbacks.helpers import safe_answer
 from cantarella.button import Button as InlineKeyboardButton
 from pyrogram.enums import ParseMode
 from config import *
@@ -17,23 +18,18 @@ from cantarella.core.database import db
 
 @Client.on_callback_query(filters.regex("^start$"))
 async def cb_start(client: Client, callback_query):
+    await safe_answer(callback_query)
     buttons = []
     is_admin = await db.is_admin(callback_query.from_user.id)
+    buttons.append([
+        InlineKeyboardButton("✦ ʜᴇʟᴘ", callback_data="help"),
+        InlineKeyboardButton("ℹ️ ᴀʙᴏᴜᴛ", callback_data="about"),
+    ])
     if is_admin or callback_query.from_user.id == OWNER_ID:
         buttons.append([
             InlineKeyboardButton("⚙️ ᴀᴅᴍɪɴ ᴘᴀɴᴇʟ", callback_data="admin_panel"),
-            InlineKeyboardButton("🔄 ᴏɴɢᴏɪɴɢ", callback_data="toggle_ongoing")
+            InlineKeyboardButton("❤ ғᴀᴠᴏʀɪᴛᴇꜱ", callback_data="favorites"),
         ])
-
-    if is_admin or callback_query.from_user.id == OWNER_ID:
-        buttons.append([
-            InlineKeyboardButton("❤ ғᴀᴠᴏʀɪᴛᴇꜱ", callback_data="favorites")
-        ])
-
-    buttons.append([
-        InlineKeyboardButton("✦ ᴀʙᴏᴜᴛ", callback_data="about"),
-        InlineKeyboardButton("ʜᴇʟᴘ ✦",  callback_data="help")
-    ])
 
     inline_buttons = InlineKeyboardMarkup(buttons)
     try:
@@ -67,6 +63,7 @@ async def cb_start(client: Client, callback_query):
 
 @Client.on_callback_query(filters.regex("^about$"))
 async def cb_about(client: Client, callback_query):
+    await safe_answer(callback_query)
     await callback_query.edit_message_media(
         InputMediaPhoto("https://files.catbox.moe/is7q4q.jpg", Dead.ABOUT_TXT),
         reply_markup=InlineKeyboardMarkup([
@@ -80,6 +77,7 @@ async def cb_about(client: Client, callback_query):
 
 @Client.on_callback_query(filters.regex("^help$"))
 async def cb_help(client: Client, callback_query):
+    await safe_answer(callback_query)
     await callback_query.edit_message_media(
         InputMediaPhoto(
             "https://envs.sh/Wdj.jpg",
@@ -105,6 +103,7 @@ async def cb_help(client: Client, callback_query):
 
 @Client.on_callback_query(filters.regex("^(cancel|close)$"))
 async def on_cancel_or_close(client, callback_query):
+    await safe_answer(callback_query)
     try:
         await callback_query.message.delete()
     except:

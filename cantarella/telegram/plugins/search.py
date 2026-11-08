@@ -42,22 +42,39 @@ async def handle_url(client: Client, message):
 
         user_search_results[message.from_user.id] = results
 
-        buttons = []
-        for res in results:
-            cb_data = f"anime_{res['id']}"
-            if len(cb_data) > 64:
-                cb_data = cb_data[:64]
-
-            buttons.append([InlineKeyboardButton(f"{res['title']} ({res['type']})", callback_data=cb_data)])
-
-        buttons.append([InlineKeyboardButton("❌ ᴄʟᴏꜱᴇ", callback_data="cancel")])
+        # Index-based callbacks: full slugs routinely exceed Telegram's
+        # 64-byte limit and got silently truncated (dead results).
+        buttons = [[
+            InlineKeyboardButton(f"✦ {idx+1}. {res['title'][:38]}", callback_data=f"anime_idx_{idx}")
+            for idx, res in enumerate(results[:8])
+        ]]
+        # Two-column layout for the rest to keep the menu compact.
+        rest = list(enumerate(results))[8:24]
+        for i in range(0, len(rest), 2):
+            row = [
+                InlineKeyboardButton(f"✦ {rest[i][0]+1}. {rest[i][1]['title'][:24]}", callback_data=f"anime_idx_{rest[i][0]}")
+            ]
+            if i + 1 < len(rest):
+                row.append(InlineKeyboardButton(f"✦ {rest[i+1][0]+1}. {rest[i+1][1]['title'][:24]}", callback_data=f"anime_idx_{rest[i+1][0]}"))
+            buttons.append(row)
+        buttons.append([
+            InlineKeyboardButton("⬅️ ʙᴀᴄᴋ", callback_data="start"),
+            InlineKeyboardButton("❌ ᴄʟᴏꜱᴇ", callback_data="cancel"),
+        ])
 
         keyboard = InlineKeyboardMarkup(buttons)
-        await status_msg.edit_caption(
-            caption="<blockquote>📺 <b>ꜱᴇᴀʀᴄʜ ʀᴇꜱᴜʟᴛꜱ:</b>\nꜱᴇʟᴇᴄᴛ ᴀɴ ᴀɴɪᴍᴇ:</blockquote>",
-            reply_markup=keyboard,
-            parse_mode=ParseMode.HTML
-        )
+        try:
+            await status_msg.edit_caption(
+                caption=f"<blockquote>📺 <b>ꜱᴇᴀʀᴄʜ ʀᴇꜱᴜʟᴛs — {len(results)} found</b>\n<i>Source: ✨ Re:Anime</i>\n\nꜱᴇʟᴇᴄᴛ ᴀɴ ᴀɴɪᴍᴇ:</blockquote>",
+                reply_markup=keyboard,
+                parse_mode=ParseMode.HTML
+            )
+        except Exception:
+            await status_msg.edit_text(
+                f"<blockquote>📺 <b>ꜱᴇᴀʀᴄʜ ʀᴇꜱᴜʟᴛs — {len(results)} found</b>\n<i>Source: ✨ Re:Anime</i>\n\nꜱᴇʟᴇᴄᴛ ᴀɴ ᴀɴɪᴍᴇ:</blockquote>",
+                reply_markup=keyboard,
+                parse_mode=ParseMode.HTML
+            )
         return
 
     is_episode = "ep=" in url or "episode-" in url or (is_animetsu and "/watch/" in url) or (is_reanime and "/watch/" in url)
