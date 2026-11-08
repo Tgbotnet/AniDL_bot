@@ -44,19 +44,12 @@ async def handle_url(client: Client, message):
 
         # Index-based callbacks: full slugs routinely exceed Telegram's
         # 64-byte limit and got silently truncated (dead results).
-        buttons = [[
-            InlineKeyboardButton(f"✦ {idx+1}. {res['title'][:38]}", callback_data=f"anime_idx_{idx}")
-            for idx, res in enumerate(results[:8])
-        ]]
-        # Two-column layout for the rest to keep the menu compact.
-        rest = list(enumerate(results))[8:24]
-        for i in range(0, len(rest), 2):
-            row = [
-                InlineKeyboardButton(f"✦ {rest[i][0]+1}. {rest[i][1]['title'][:24]}", callback_data=f"anime_idx_{rest[i][0]}")
-            ]
-            if i + 1 < len(rest):
-                row.append(InlineKeyboardButton(f"✦ {rest[i+1][0]+1}. {rest[i+1][1]['title'][:24]}", callback_data=f"anime_idx_{rest[i+1][0]}"))
-            buttons.append(row)
+        # One per row with the *full* title so long Re:Anime names stay
+        # readable (never truncate - the client wraps/scrolls instead).
+        buttons = [
+            [InlineKeyboardButton(f"✦ {idx + 1}. {res['title']}", callback_data=f"anime_idx_{idx}")]
+            for idx, res in enumerate(results[:24])
+        ]
         buttons.append([
             InlineKeyboardButton("⬅️ ʙᴀᴄᴋ", callback_data="start"),
             InlineKeyboardButton("❌ ᴄʟᴏꜱᴇ", callback_data="cancel"),

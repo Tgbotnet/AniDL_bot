@@ -244,6 +244,57 @@ async def handle_ping(client: Client, message):
     await msg.edit_text(f"<b>ᴘᴏɴɢ!</b> <code>{ping:.3f} ᴍꜱ</code>", parse_mode=ParseMode.HTML)
 
 
+@Client.on_message(filters.private & filters.command(["mongodb", "mongostatus", "mgdb"]))
+async def handle_mongodb(client: Client, message):
+    """Check MongoDB status (admin only)."""
+    is_admin = await db.is_admin(message.from_user.id)
+    if message.from_user.id != OWNER_ID and not is_admin:
+        return await message.reply("<blockquote>❌ ᴛʜɪꜱ ᴄᴏᴍᴍᴀɴᴅ ɪꜱ ғᴏʀ ᴀᴅᴍɪɴɪꜱᴛʀᴀᴛᴏʀꜱ ᴏɴʟʏ.</blockquote>", parse_mode=ParseMode.HTML)
+
+    sts = await message.reply("<blockquote>🍃 <b>ᴄʜᴇᴄᴋɪɴɢ ᴍᴏɴɢᴏᴅʙ...</b></blockquote>", parse_mode=ParseMode.HTML)
+    status = await db.get_mongo_status()
+
+    def fmt(b):
+        if b is None:
+            return "—"
+        if b < 1024 * 1024:
+            return f"{b / 1024:.1f} KB"
+        if b < 1024 * 1024 * 1024:
+            return f"{b / (1024 * 1024):.2f} MB"
+        return f"{b / (1024 * 1024 * 1024):.2f} GB"
+
+    if not status.get("connected"):
+        text = (
+            "<blockquote>🍃 <b>ᴍᴏɴɢᴏᴅʙ sᴛᴀᴛᴜs</b>\n\n"
+            "<b>✦ sᴛᴀᴛᴜs</b> › ❌ <b>ᴅɪsᴄᴏɴɴᴇᴄᴛᴇᴅ / ɴᴏᴛ ᴄᴏɴғɪɢᴜʀᴇᴅ</b>\n"
+            f"<b>✦ ᴅᴇᴛᴀɪʟ</b> › <code>{status.get('error', 'unknown')}</code></blockquote>"
+        )
+        return await sts.edit_text(text, parse_mode=ParseMode.HTML)
+
+    uptime_h = status.get("uptime")
+    uptime_txt = f"{uptime_h / 3600:.1f}h" if isinstance(uptime_h, (int, float)) else "—"
+
+    text = (
+        "<blockquote expandable>🍃 <b>ᴍᴏɴɢᴏᴅʙ sᴛᴀᴛᴜs</b>\n\n"
+        f"<b>✦ sᴛᴀᴛᴜs</b> › ✅ <b>ᴄᴏɴɴᴇᴄᴛᴇᴅ</b>\n"
+        f"<b>✦ ᴘɪɴɢ</b> › <code>{status.get('ping_ms', 0):.1f} ᴍs</code>\n"
+        f"<b>✦ ᴠᴇʀsɪᴏɴ</b> › <code>{status.get('version') or '—'}</code>\n"
+        f"<b>✦ ᴜᴘᴛɪᴍᴇ</b> › <code>{uptime_txt}</code>\n"
+        f"<b>✦ ᴄᴏɴɴᴇᴄᴛɪᴏɴs</b> › <code>{status.get('connections') if status.get('connections') is not None else '—'}</code>\n\n"
+        f"<b>✦ ᴄᴏʟʟᴇᴄᴛɪᴏɴs</b> › <code>{status.get('collections_count', 0)}</code>\n"
+        f"<b>✦ ᴏʙᴊᴇᴄᴛs</b> › <code>{status.get('objects') if status.get('objects') is not None else '—'}</code>\n"
+        f"<b>✦ ɪɴᴅᴇxᴇs</b> › <code>{status.get('indexes') if status.get('indexes') is not None else '—'}</code>\n"
+        f"<b>✦ ᴅᴀᴛᴀ</b> › <code>{fmt(status.get('data_size'))}</code>\n"
+        f"<b>✦ sᴛᴏʀᴀɢᴇ</b> › <code>{fmt(status.get('storage_size'))}</code>\n"
+        f"<b>✦ ɪɴᴅᴇx</b> › <code>{fmt(status.get('index_size'))}</code>\n"
+        f"<b>✦ ᴛᴏᴛᴀʟ</b> › <code>{fmt(status.get('total_size'))}</code></blockquote>"
+    )
+    if status.get("collections"):
+        text += f"\n\n<code>{status.get('collections')}</code>"
+
+    await sts.edit_text(text, parse_mode=ParseMode.HTML)
+
+
 @Client.on_message(filters.private & filters.command("restart"))
 async def handle_restart(client: Client, message):
     is_admin = await db.is_admin(message.from_user.id)

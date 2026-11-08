@@ -104,7 +104,7 @@ async def cb_admin_panel(client: Client, callback_query):
         ],
         [
             InlineKeyboardButton("📢 ʙʀᴏᴀᴅᴄᴀꜱᴛ",    callback_data="admin_broadcast"),
-            InlineKeyboardButton("📊 ꜱᴛᴀᴛꜱ",         callback_data="admin_stats")
+            InlineKeyboardButton("🍃 ᴍᴏɴɢᴏ",         callback_data="admin_mongodb")
         ],
         [
             InlineKeyboardButton("➕ ᴀᴅᴅ ᴄʜᴀɴɴᴇʟ",   callback_data="admin_addchnl_prompt"),
@@ -149,6 +149,50 @@ async def cb_stats(client: Client, callback_query):
         ]),
         parse_mode=ParseMode.HTML
     )
+
+@Client.on_callback_query(filters.regex("^admin_mongodb$") & admin)
+async def cb_mongodb(client: Client, callback_query):
+    await safe_answer(callback_query, "🍃 Checking MongoDB...")
+    status = await db.get_mongo_status()
+
+    def fmt(b):
+        if b is None:
+            return "—"
+        if b < 1024 * 1024:
+            return f"{b / 1024:.1f} KB"
+        if b < 1024 * 1024 * 1024:
+            return f"{b / (1024 * 1024):.2f} MB"
+        return f"{b / (1024 * 1024 * 1024):.2f} GB"
+
+    back = InlineKeyboardMarkup([
+        [InlineKeyboardButton("⬅️ ʙᴀᴄᴋ", callback_data="admin_panel")]
+    ])
+    if not status.get("connected"):
+        return await callback_query.edit_message_text(
+            "<blockquote>🍃 <b>ᴍᴏɴɢᴏᴅʙ sᴛᴀᴛᴜs</b>\n\n"
+            f"<b>✦ sᴛᴀᴛᴜs</b> › ❌ <b>ᴅɪsᴄᴏɴɴᴇᴄᴛᴇᴅ / ɴᴏᴛ ᴄᴏɴғɪɢᴜʀᴇᴅ</b>\n"
+            f"<b>✦ ᴅᴇᴛᴀɪʟ</b> › <code>{status.get('error', 'unknown')}</code></blockquote>",
+            reply_markup=back, parse_mode=ParseMode.HTML,
+        )
+    uptime_h = status.get("uptime")
+    uptime_txt = f"{uptime_h / 3600:.1f}h" if isinstance(uptime_h, (int, float)) else "—"
+    text = (
+        "<blockquote expandable>🍃 <b>ᴍᴏɴɢᴏᴅʙ sᴛᴀᴛᴜs</b>\n\n"
+        f"<b>✦ sᴛᴀᴛᴜs</b> › ✅ <b>ᴄᴏɴɴᴇᴄᴛᴇᴅ</b>\n"
+        f"<b>✦ ᴘɪɴɢ</b> › <code>{status.get('ping_ms', 0):.1f} ᴍs</code>\n"
+        f"<b>✦ ᴠᴇʀsɪᴏɴ</b> › <code>{status.get('version') or '—'}</code>\n"
+        f"<b>✦ ᴜᴘᴛɪᴍᴇ</b> › <code>{uptime_txt}</code>\n"
+        f"<b>✦ ᴄᴏɴɴᴇᴄᴛɪᴏɴs</b> › <code>{status.get('connections') if status.get('connections') is not None else '—'}</code>\n\n"
+        f"<b>✦ ᴄᴏʟʟᴇᴄᴛɪᴏɴs</b> › <code>{status.get('collections_count', 0)}</code>\n"
+        f"<b>✦ ᴏʙᴊᴇᴄᴛs</b> › <code>{status.get('objects') if status.get('objects') is not None else '—'}</code>\n"
+        f"<b>✦ ɪɴᴅᴇxᴇs</b> › <code>{status.get('indexes') if status.get('indexes') is not None else '—'}</code>\n"
+        f"<b>✦ ᴅᴀᴛᴀ</b> › <code>{fmt(status.get('data_size'))}</code>\n"
+        f"<b>✦ sᴛᴏʀᴀɢᴇ</b> › <code>{fmt(status.get('storage_size'))}</code>\n"
+        f"<b>✦ ɪɴᴅᴇx</b> › <code>{fmt(status.get('index_size'))}</code>\n"
+        f"<b>✦ ᴛᴏᴛᴀʟ</b> › <code>{fmt(status.get('total_size'))}</code></blockquote>"
+    )
+    await callback_query.edit_message_text(text, reply_markup=back, parse_mode=ParseMode.HTML)
+
 
 # ─────────────────────────────────────────────
 #  Ban / Unban  (prompt → ForceReply or inline state)

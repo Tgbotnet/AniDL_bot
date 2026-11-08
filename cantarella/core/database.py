@@ -1,6 +1,7 @@
 #@cantarellabots
 import motor.motor_asyncio
 import logging
+import time
 from datetime import datetime, date
 from typing import List, Optional
 from config import MONGO_URL, MONGO_NAME
@@ -375,6 +376,41 @@ class Database:
         except Exception as e:
             logging.error(f"ᴇʀʀᴏʀ ꜰᴇᴛᴄʜɪɴɢ ᴅʙ ꜱᴛᴀᴛꜱ: {e}")
             return None
+
+    async def get_mongo_status(self) -> dict:
+        """Full status for ``/mongodb``: connectivity, ping, version, sizes."""
+        if self.db is None:
+            return {"connected": False, "error": "MONGO_URL not set — database disabled"}
+        start = time.time()
+        try:
+            stats = await self.db.command("dbStats")
+            try:
+                server = await self.db.command("serverStatus")
+            except Exception:
+                server = {}
+            try:
+                collections = await self.db.list_collection_names()
+            except Exception:
+                collections = []
+            ping_ms = (time.time() - start) * 1000
+            return {
+                "connected": True,
+                "ping_ms": ping_ms,
+                "version": server.get("version") if isinstance(server, dict) else None,
+                "uptime": server.get("uptime") if isinstance(server, dict) else None,
+                "connections": (server.get("connections") or {}).get("current") if isinstance(server, dict) and isinstance(server.get("connections"), dict) else None,
+                "collections_count": len(collections),
+                "collections": ", ".join(collections[:20]) + ("…" if len(collections) > 20 else ""),
+                "data_size": stats.get("dataSize", 0),
+                "storage_size": stats.get("storageSize", 0),
+                "index_size": stats.get("indexSize", 0),
+                "total_size": stats.get("storageSize", 0) + stats.get("indexSize", 0),
+                "objects": stats.get("objects"),
+                "indexes": stats.get("indexes"),
+            }
+        except Exception as e:
+            logging.error(f"ᴇʀʀᴏʀ ᴄʜᴇᴄᴋɪɴɢ ᴍᴏɴɢᴏ: {e}")
+            return {"connected": False, "error": str(e), "ping_ms": (time.time() - start) * 1000}
 
 
 # ── Singleton instances ──────────────────────────────────────────────────────

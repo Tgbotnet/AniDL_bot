@@ -251,7 +251,7 @@ async def handle_favorites(client: Client, message):
     user_favorites_cache[user_id] = favorites
     buttons = []
     for idx, fav in enumerate(favorites):
-        buttons.append([InlineKeyboardButton(f"❤ {fav['title'][:40]}", callback_data=f"favsel_{idx}")])
+        buttons.append([InlineKeyboardButton(f"❤ {fav['title']}", callback_data=f"favsel_{idx}")])
 
     buttons.append([InlineKeyboardButton("❌ ᴄʟᴏꜱᴇ", callback_data="close")])
 
