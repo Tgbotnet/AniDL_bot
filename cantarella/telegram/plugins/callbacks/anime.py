@@ -6,7 +6,7 @@ from pyrogram.enums import ParseMode, ChatType
 from pyrogram.types import InlineKeyboardMarkup
 from cantarella.button import Button as InlineKeyboardButton
 
-from cantarella.core.state import user_episodes, user_search_results, user_range_data, user_favorites_cache
+from cantarella.core.state import user_episodes, user_search_results, user_range_data, user_favorites_cache, anime_tokens, episodes_by_msg, new_anime_token
 from cantarella.core.database import db
 from cantarella.core.images import get_random_image
 from config import *
@@ -31,7 +31,14 @@ async def on_anime_select(client: Client, callback_query):
 
     data = callback_query.data or ""
     anime_id = None
-    if data.startswith("anime_idx_"):
+    token_source = None
+    if data.startswith("anime_tok_"):
+        tok = data.rsplit("_", 1)[-1]
+        entry = anime_tokens.get(tok)
+        if entry and entry.get("user_id") == callback_query.from_user.id:
+            anime_id = entry.get("anime_id")
+            token_source = entry.get("source")
+    elif data.startswith("anime_idx_"):
         try:
             idx = int(data.rsplit("_", 1)[-1])
         except (ValueError, IndexError):
@@ -45,7 +52,7 @@ async def on_anime_select(client: Client, callback_query):
         await safe_answer(callback_query, "❌ Search expired — search again.")
         return
 
-    active_source = await db.get_user_setting(0, "active_source", "reanime")
+    active_source = token_source or await db.get_user_setting(0, "active_source", "reanime")
     if active_source == "animetsu":
         url = f"https://animetsu.live/anime/{anime_id}"
         from cantarella.scraper.animetsu import AnimetsuScraper
@@ -78,14 +85,44 @@ async def on_anime_select(client: Client, callback_query):
         'url':      url,
         'page':     0
     }
+    try:
+        episodes_by_msg[(callback_query.message.chat.id, callback_query.message.id)] = {
+            'title': user_episodes[callback_query.from_user.id]['title'],
+            'episodes': entries,
+            'url': url,
+        }
+    except Exception:
+        pass
     await show_episodes_page(client, callback_query, 0)
+
+
+def _episodes_for_query(callback_query):
+    """Resolve episodes for *this* menu message, falling back to the
+    legacy per-user slot. Prevents downloading the wrong anime when the
+    user has two episode menus open."""
+    try:
+        msg = callback_query.message
+        key = (msg.chat.id, msg.id)
+        if key in episodes_by_msg:
+            return episodes_by_msg[key]
+    except Exception:
+        pass
+    return user_episodes.get(callback_query.from_user.id)
 
 
 async def show_episodes_page(client, callback_query, page):
     user_id = callback_query.from_user.id
-    data    = user_episodes.get(user_id)
+    data    = _episodes_for_query(callback_query)
     if not data:
         return
+    try:
+        episodes_by_msg[(callback_query.message.chat.id, callback_query.message.id)] = {
+            "title": data.get("title"),
+            "episodes": data.get("episodes"),
+            "url": data.get("url"),
+        }
+    except Exception:
+        pass
 
     entries         = data['episodes']
     start           = page * 20
@@ -457,8 +494,9 @@ async def on_favorites_cb(client: Client, callback_query):
     user_favorites_cache[user_id] = favorites
 
     buttons = []
-    for idx, fav in enumerate(favorites):
-        buttons.append([InlineKeyboardButton(fav['title'], callback_data=f"favsel_{idx}")])
+    for fav in favorites:
+        tok = new_anime_token(user_id, fav['id'], await db.get_user_setting(0, "active_source", "reanime"))
+        buttons.append([InlineKeyboardButton(fav['title'], callback_data=f"anime_tok_{tok}")])
 
     buttons.append([InlineKeyboardButton("⬅️ ʙᴀᴄᴋ", callback_data="start"), InlineKeyboardButton("❌ ᴄʟᴏꜱᴇ", callback_data="close")])
 
@@ -493,7 +531,8 @@ async def on_episode_select(client: Client, callback_query):
 
     ep_idx  = int(callback_query.data.rsplit("_", 1)[-1])
     user_id = callback_query.from_user.id
-    if user_id not in user_episodes:
+    ep_data = _episodes_for_query(callback_query)
+    if not ep_data or not ep_data.get("episodes") or ep_idx >= len(ep_data.get("episodes") or []):
         await callback_query.answer("❌ ꜱᴇꜱꜱɪᴏɴ ᴇxᴘɪʀᴇᴅ.")
         return
     await safe_answer(callback_query)

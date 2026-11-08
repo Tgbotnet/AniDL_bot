@@ -88,20 +88,33 @@ async def __handle_download_internal(client: Client, message, url, status_msg, i
     upload_q = Queue()
     downloader = cantarellatvDownloader(progress_queue=progress_q)
 
+    uploaded_messages = []
+    active_uploads = [0]
+    error = [None]
+
     def download_target():
         if is_playlist and quality != "all":
-            downloader.download_all_episodes(url, quality=quality)
+            # Strict one-by-one: download ep -> upload -> delete -> next ep.
+            try:
+                entries = downloader.list_episodes(url)
+            except Exception:
+                entries = []
+            for entry in entries:
+                downloader.download_episode(entry.get("url", url), quality=quality,
+                                              name_override=name_override, season_override=season_override,
+                                              ep_num_override=ep_num_override)
+                # Wait for the monitor to finish uploading + deleting this
+                # episode's file before starting the next download.
+                while not (active_uploads[0] == 0 and progress_q.empty() and upload_q.empty()):
+                    time.sleep(0.5)
         else:
             downloader.download_episode(url, quality=quality, name_override=name_override, season_override=season_override, ep_num_override=ep_num_override)
 
     thread = Thread(target=download_target)
     thread.start()
 
-    uploaded_messages = []
-    active_uploads = [0]
-    error = [None]
-
     async def do_upload(filename, title):
+        succeeded = False
         last_up_time = [time.time()]
         last_up_size = [0]
 
@@ -145,17 +158,20 @@ async def __handle_download_internal(client: Client, message, url, status_msg, i
                 except Exception:
                     file_caption = title
 
-                thumb_path = "thumb.jpg" if os.path.exists("thumb.jpg") else None
-
+                # No thumbnail: thumb.jpg (1536x1024) exceeds Telegram's
+                # 320x320 / 200KB limit and makes WzGram's send_document
+                # error out / appear to hang after the file progress.
+                print(f"[upload] starting {actual_file_name} -> {chat_id}", flush=True)
                 up_msg = await client.send_document(
                     chat_id,
                     document=filename,
                     file_name=actual_file_name,
-                    thumb=thumb_path,
                     caption=file_caption,
                     progress=up_cb
                 )
+                print(f"[upload] done {actual_file_name} msg={up_msg.id if up_msg else 'null'}", flush=True)
                 uploaded_messages.append(up_msg)
+                succeeded = True
                 upload_q.put({'uploaded': True})
 
                 # --- Auto-Delete Logic for User PM ---
@@ -185,16 +201,25 @@ async def __handle_download_internal(client: Client, message, url, status_msg, i
         except Exception as e:
 
             upload_q.put({'upload_error': str(e)})
+            print(f"[upload] failed {filename}: {e}", flush=True)
             try:
                 await client.send_message(progress_chat_id, f"<blockquote>❌ ᴜᴘʟᴏᴀᴅ ғᴀɪʟᴇᴅ ғᴏʀ {title}: {str(e)}</blockquote>", parse_mode=ParseMode.HTML)
             except Exception:
                 pass
         finally:
             active_uploads[0] -= 1
-            try:
-                os.unlink(filename)
-            except:
-                pass
+            # Delete only after a successful upload so failed files stay for
+            # inspection/retry and strict one-by-one batches can proceed.
+            if succeeded:
+                try:
+                    os.unlink(filename)
+                    print(f"[upload] deleted {filename} after successful upload", flush=True)
+                except FileNotFoundError:
+                    pass
+                except Exception as exc:
+                    print(f"[upload] could not delete {filename}: {exc}", flush=True)
+            else:
+                print(f"[upload] keeping {filename} (upload did not succeed)", flush=True)
 
     async def monitor():
         current_episode_title = "Unknown"
@@ -222,7 +247,14 @@ async def __handle_download_internal(client: Client, message, url, status_msg, i
                         filename = info['filename']
                         title = info['title']
                         current_episode_title = title
-                        if is_video_file(filename):
+                        # Upload anything that was actually produced (Re:Anime
+                        # falls back to .ts without ffmpeg — still valid).
+                        uploadable = False
+                        try:
+                            uploadable = os.path.exists(filename) and os.path.getsize(filename) > 0
+                        except Exception:
+                            uploadable = is_video_file(filename)
+                        if uploadable:
                             active_uploads[0] += 1
                             text = f"<blockquote>📤 **ᴅᴏᴡɴʟᴏᴀᴅ ᴄᴏᴍᴘʟᴇᴛᴇ!**\nꜱᴛᴀʀᴛɪɴɢ ᴜᴘʟᴏᴀᴅ: {title}...</blockquote>"
                             task = asyncio.create_task(do_upload(filename, title))

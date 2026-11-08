@@ -6,7 +6,7 @@ from pyrogram.enums import ParseMode
 from pyrogram.types import InlineKeyboardMarkup
 from cantarella.button import Button as InlineKeyboardButton
 
-from cantarella.core.state import user_episodes
+from cantarella.core.state import user_episodes, episodes_by_msg
 from cantarella.telegram.download import _handle_download
 from cantarella.telegram.pages import post_to_main_channel
 from cantarella.core.utils import chunk_list
@@ -177,12 +177,31 @@ async def on_download_quality(client: Client, callback_query):
     ep_idx  = int(parts[2])
     user_id = callback_query.from_user.id
 
-    if user_id not in user_episodes:
+    try:
+        _msg = callback_query.message
+        menu_data = episodes_by_msg.get((_msg.chat.id, _msg.id)) if _msg else None
+    except Exception:
+        menu_data = None
+    scoped = menu_data or user_episodes.get(user_id)
+    if not scoped or not scoped.get("episodes") or ep_idx >= len(scoped.get("episodes") or []):
         await callback_query.answer("❌ ꜱᴇꜱꜱɪᴏɴ ᴇxᴘɪʀᴇᴅ.")
         return
 
-    ep_data = user_episodes[user_id]['episodes'][ep_idx]
+    ep_data = scoped['episodes'][ep_idx]
     ep_url = ep_data['url']
+    # Safety: the tapped menu's anime must match the downloaded episode.
+    try:
+        _menu_url = (menu_data or {}).get("url") or ""
+        _ep_url = ep_data.get("url") or ""
+        if _menu_url and _ep_url:
+            import re as _re
+            _menu_slug = _re.search(r"/(?:anime|watch)/([^/?#]+)", _menu_url)
+            _ep_slug = _re.search(r"/(?:anime|watch)/([^/?#]+)", _ep_url)
+            if _menu_slug and _ep_slug and _menu_slug.group(1) != _ep_slug.group(1):
+                await callback_query.answer("❌ ᴜᴇɴᴜ ᴇxᴘɪʀᴇᴅ — sᴇᴀʀᴄʜ ᴀɢᴀɪɴ.")
+                return
+    except Exception:
+        pass
     status_msg = await callback_query.message.reply(
         "<blockquote>🔄 ᴘʀᴇᴘᴀʀɪɴɢ ᴅᴏᴡɴʟᴏᴀᴅ...</blockquote>",
         parse_mode=ParseMode.HTML

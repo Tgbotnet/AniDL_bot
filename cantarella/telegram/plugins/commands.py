@@ -247,11 +247,13 @@ async def handle_favorites(client: Client, message):
     if not favorites:
         return await message.reply("<blockquote>❤ <b>ʏᴏᴜʀ ғᴀᴠᴏʀɪᴛᴇꜱ ʟɪꜱᴛ ɪꜱ ᴇᴍᴘᴛʏ.</b>\nꜱᴇᴀʀᴄʜ ғᴏʀ ᴀɴ ᴀɴɪᴍᴇ ᴛᴏ ᴀᴅᴅ ɪᴛ ᴛᴏ ʏᴏᴜʀ ғᴀᴠᴏʀɪᴛᴇꜱ!</blockquote>", parse_mode=ParseMode.HTML)
 
-    from cantarella.core.state import user_favorites_cache
+    from cantarella.core.state import user_favorites_cache, new_anime_token
     user_favorites_cache[user_id] = favorites
+    active_source = await db.get_user_setting(0, "active_source", "reanime")
     buttons = []
-    for idx, fav in enumerate(favorites):
-        buttons.append([InlineKeyboardButton(f"❤ {fav['title']}", callback_data=f"favsel_{idx}")])
+    for fav in favorites:
+        tok = new_anime_token(user_id, fav['id'], active_source)
+        buttons.append([InlineKeyboardButton(f"❤ {fav['title']}", callback_data=f"anime_tok_{tok}")])
 
     buttons.append([InlineKeyboardButton("❌ ᴄʟᴏꜱᴇ", callback_data="close")])
 

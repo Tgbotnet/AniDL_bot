@@ -9,7 +9,7 @@ def chunk_list(lst, n):
 
 def is_video_file(filename):
     suffix = Path(filename).suffix.lower()
-    return suffix in {'.mp4', '.mkv', '.webm', '.m4v', '.avi', '.mov'}
+    return suffix in {'.mp4', '.mkv', '.webm', '.m4v', '.avi', '.mov', '.ts', '.m2ts'}
 
 def encode_data(data: str) -> str:
     """Encode string data to base64."""

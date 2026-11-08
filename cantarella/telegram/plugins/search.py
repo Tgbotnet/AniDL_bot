@@ -10,7 +10,7 @@ from cantarella.core.database import db
 from cantarella.core.images import get_random_image
 from cantarella.scraper.search import search_anime
 from cantarella.scraper.cantarellatv import cantarellatvDownloader
-from cantarella.core.state import current_urls, user_search_results
+from cantarella.core.state import current_urls, user_search_results, new_anime_token
 from cantarella.telegram.download import _handle_download
 from config import OWNER_ID, TARGET_CHAT_ID
 
@@ -42,12 +42,11 @@ async def handle_url(client: Client, message):
 
         user_search_results[message.from_user.id] = results
 
-        # Index-based callbacks: full slugs routinely exceed Telegram's
-        # 64-byte limit and got silently truncated (dead results).
-        # One per row with the *full* title so long Re:Anime names stay
-        # readable (never truncate - the client wraps/scrolls instead).
+        # Token callbacks: each result gets an immutable token so old
+        # messages keep resolving to the anime that was actually shown,
+        # even after newer searches overwrite the per-user slot.
         buttons = [
-            [InlineKeyboardButton(f"✦ {idx + 1}. {res['title']}", callback_data=f"anime_idx_{idx}")]
+            [InlineKeyboardButton(f"✦ {idx + 1}. {res['title']}", callback_data=f"anime_tok_{new_anime_token(message.from_user.id, res['id'], active_source)}")]
             for idx, res in enumerate(results[:24])
         ]
         buttons.append([
